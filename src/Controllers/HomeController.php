@@ -60,7 +60,7 @@ class HomeController {
                             <?php if ($product['image']): ?>
                                 <img src="/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
                                      alt="<?php echo htmlspecialchars($product['name']); ?>" 
-                                     class="w-full h-64 object-cover">
+                                     class="w-full h-64 object-contain bg-white">
                             <?php else: ?>
                                 <div class="text-6xl text-gold-400 opacity-50">👗</div>
                             <?php endif; ?>

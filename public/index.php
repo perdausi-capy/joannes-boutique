@@ -22,6 +22,8 @@ require __DIR__ . '/../src/Models/Cart.php';
 require __DIR__ . '/../src/Models/Order.php';
 require __DIR__ . '/../src/Models/OrderItem.php';
 require __DIR__ . '/../src/Models/Testimonial.php';
+require __DIR__ . '/../src/Models/Booking.php';
+require __DIR__ . '/../src/Models/ProductImage.php';
 
 // Controllers
 require __DIR__ . '/../src/Controllers/HomeController.php';
@@ -29,6 +31,8 @@ require __DIR__ . '/../src/Controllers/ProductController.php';
 require __DIR__ . '/../src/Controllers/AuthController.php';
 require __DIR__ . '/../src/Controllers/CartController.php';
 require __DIR__ . '/../src/Controllers/AdminController.php';
+require __DIR__ . '/../src/Controllers/BookingController.php';
+require __DIR__ . '/../src/Controllers/PackageController.php';
 
 // Initialize session/CSRF
 CSRF::init();
@@ -48,6 +52,10 @@ switch (true) {
 
 	case $path === '/products':
 		(new ProductController())->index();
+		break;
+
+	case $path === '/packages':
+		(new PackageController())->index();
 		break;
 
 	case preg_match('#^/products/show/(\d+)$#', $path, $m):
@@ -91,6 +99,10 @@ switch (true) {
 		(new CartController())->processCheckout();
 		break;
 
+	case $path === '/cart/buy-now' && $_SERVER['REQUEST_METHOD'] === 'POST':
+		(new CartController())->buyNow();
+		break;
+
 	case $path === '/auth/login':
 		(new AuthController())->login();
 		break;
@@ -111,8 +123,28 @@ switch (true) {
 		(new AuthController())->orders();
 		break;
 
+	case $path === '/booking' && $_SERVER['REQUEST_METHOD'] === 'GET':
+		(new BookingController())->index();
+		break;
+
+	case $path === '/booking' && $_SERVER['REQUEST_METHOD'] === 'POST':
+		(new BookingController())->submit();
+		break;
+
 	case $path === '/admin/dashboard':
 		(new AdminController())->dashboard();
+		break;
+
+	case $path === '/admin/products':
+		(new AdminController())->products();
+		break;
+
+	case $path === '/admin/bookings':
+		(new AdminController())->bookings();
+		break;
+
+	case $path === '/admin/orders':
+		(new AdminController())->orders();
 		break;
 
 	default:

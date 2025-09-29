@@ -54,17 +54,21 @@ class ProductController {
             $this->render('404');
             return;
         }
+        // Load extra images
+        require_once __DIR__ . '/../Models/ProductImage.php';
+        $imageModel = new ProductImage();
+        $productImages = $imageModel->findByProductId($id);
         
         // Get related products
         $relatedProducts = [];
         if (!empty($product['category_id'])) {
             $relatedProducts = $this->productModel->findByCategory($product['category_id'], 4);
-            // Remove current product from related
             $relatedProducts = array_filter($relatedProducts, fn($p) => $p['id'] != $id);
         }
         
         $this->render('products/show', [
             'product' => $product,
+            'productImages' => $productImages,
             'relatedProducts' => $relatedProducts
         ]);
     }

@@ -16,6 +16,7 @@ class Migration {
         $this->createUsersTable();
         $this->createCategoriesTable();
         $this->createProductsTable();
+        $this->createProductImagesTable();
         $this->createOrdersTable();
         $this->createOrderItemsTable();
         $this->createCartTable();
@@ -76,6 +77,19 @@ class Migration {
         
         $this->db->exec($sql);
         echo "✓ Products table created\n";
+    }
+    
+    private function createProductImagesTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS product_images (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            product_id INT NOT NULL,
+            filename VARCHAR(255) NOT NULL,
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )";
+        $this->db->exec($sql);
+        echo "✓ Product images table created\n";
     }
     
     private function createOrdersTable() {

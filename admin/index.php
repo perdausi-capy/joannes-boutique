@@ -60,6 +60,9 @@ $recentOrders = $orderModel->findAll(10);
                 <a href="/admin/testimonials.php" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-comments mr-2"></i> Testimonials
                 </a>
+                <a href="/admin/bookings" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-calendar-alt mr-2"></i> Bookings
+                </a>
                 <a href="/" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-globe mr-2"></i> View Website
                 </a>

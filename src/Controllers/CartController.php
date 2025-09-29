@@ -190,6 +190,25 @@ class CartController {
         }
     }
     
+    public function buyNow() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /products');
+            exit;
+        }
+        $productId = intval($_POST['product_id'] ?? 0);
+        if ($productId <= 0) { header('Location: /products'); exit; }
+        $userId = $_SESSION['user_id'] ?? null;
+        $sessionId = session_id();
+        try {
+            $this->cartModel->addItem($userId, $sessionId, $productId, 1);
+            header('Location: /cart/checkout');
+            exit;
+        } catch (Exception $e) {
+            header('Location: /products?error=Unable to buy now');
+            exit;
+        }
+    }
+    
     private function render($template, $data = []) {
         extract($data);
         $pageTitle = 'Shopping Cart | Joanne\'s';

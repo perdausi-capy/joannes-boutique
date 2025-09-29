@@ -39,7 +39,7 @@ $recentOrders = $orderModel->findAll(10);
                 <a href="/admin/dashboard" class="block px-4 py-3 text-gray-700 bg-blue-50 border-r-2 border-blue-500">
                     <i class="fas fa-dashboard mr-2"></i> Dashboard
                 </a>
-                <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                <a href="/admin/products" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-box mr-2"></i> Products
                 </a>
                 <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
@@ -50,6 +50,9 @@ $recentOrders = $orderModel->findAll(10);
                 </a>
                 <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-comments mr-2"></i> Testimonials
+                </a>
+                <a href="/admin/bookings" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-calendar-alt mr-2"></i> Bookings
                 </a>
                 <a href="/" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-globe mr-2"></i> View Website
