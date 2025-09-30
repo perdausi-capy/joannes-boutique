@@ -181,6 +181,94 @@ class AdminController {
         $orders = $orderModel->findAll(50);
         $this->render('admin/orders', ['orders' => $orders, 'userModel' => $userModel]);
     }
+    
+    public function testimonials() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/Testimonial.php';
+        $testimonialModel = new Testimonial();
+        $testimonials = $testimonialModel->findAll();
+        $this->render('admin/testimonials', ['testimonials' => $testimonials]);
+    }
+    
+    public function users() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/User.php';
+        $userModel = new User();
+        $users = $userModel->findAll();
+        $this->render('admin/users', ['users' => $users]);
+    }
+
+    public function approveTestimonial() {
+        Auth::requireAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = $input['id'] ?? null;
+        
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'Invalid testimonial ID']);
+            return;
+        }
+        
+        require_once __DIR__ . '/../Models/Testimonial.php';
+        $testimonialModel = new Testimonial();
+        
+        try {
+            $testimonialModel->approve($id);
+            echo json_encode(['success' => true, 'message' => 'Testimonial approved successfully']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function rejectTestimonial() {
+        Auth::requireAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = $input['id'] ?? null;
+        
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'Invalid testimonial ID']);
+            return;
+        }
+        
+        require_once __DIR__ . '/../Models/Testimonial.php';
+        $testimonialModel = new Testimonial();
+        
+        try {
+            $testimonialModel->reject($id);
+            echo json_encode(['success' => true, 'message' => 'Testimonial rejected successfully']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function viewTestimonial($id) {
+        Auth::requireAdmin();
+        
+        require_once __DIR__ . '/../Models/Testimonial.php';
+        $testimonialModel = new Testimonial();
+        $testimonial = $testimonialModel->findById($id);
+        
+        if (!$testimonial) {
+            http_response_code(404);
+            echo 'Testimonial not found';
+            return;
+        }
+        
+        $this->render('admin/testimonial-view', ['testimonial' => $testimonial]);
+    }
 
     private function render($template, $data = []) {
         extract($data);

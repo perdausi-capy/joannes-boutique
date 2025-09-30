@@ -49,4 +49,16 @@ class Product extends BaseModel {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+    
+    public function delete($id) {
+        // First delete associated images
+        $productImageStmt = $this->db->prepare("DELETE FROM product_images WHERE product_id = :id");
+        $productImageStmt->execute([':id' => $id]);
+        
+        // Then delete the product
+        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }

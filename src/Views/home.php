@@ -83,19 +83,19 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-8">
-                        <a href="<?php echo rtrim(BASE_URL, '/'); ?>/" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="/" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
                             Home
                         </a>
-                        <a href="products" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="/products" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
                             Gallery
                         </a>
-                        <a href="packages" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="/packages" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
                             Packages
                         </a>
-                        <a href="testimonials" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="/testimonials" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
                             Reviews
                         </a>
-                        <a href="contact" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="/contact" class="text-gray-700 hover:text-gold-400 px-3 py-2 text-sm font-medium transition-colors">
                             Contact Us
                         </a>
                     </div>
@@ -175,11 +175,11 @@
              x-transition:leave-end="opacity-0 scale-95"
              class="md:hidden bg-white border-t shadow-lg">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="<?php echo rtrim(BASE_URL, '/'); ?>/" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Home</a>
-                <a href="products" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Gallery</a>
-                <a href="packages" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Packages</a>
-                <a href="testimonials" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Reviews</a>
-                <a href="contact" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Contact Us</a>
+                <a href="/" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Home</a>
+                <a href="/products" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Gallery</a>
+                <a href="/packages" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Packages</a>
+                <a href="/testimonials" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Reviews</a>
+                <a href="/contact" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Contact Us</a>
                 
                 <hr class="my-2">
                 
@@ -199,17 +199,17 @@
                         <div class="px-3 py-2 text-sm text-gray-500">
                             Hello, <?php echo htmlspecialchars(Auth::user()['first_name']); ?>
                         </div>
-                        <a href="auth/profile" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Profile</a>
-                        <a href="auth/orders" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">My Orders</a>
+                        <a href="/auth/profile" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Profile</a>
+                        <a href="/auth/orders" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">My Orders</a>
                         <?php if (Auth::isAdmin()): ?>
-                            <a href="admin/dashboard" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Admin Panel</a>
+                            <a href="/admin/dashboard" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Admin Panel</a>
                         <?php endif; ?>
-                        <a href="auth/logout" class="block px-3 py-2 text-red-600 hover:bg-gray-50 rounded-md transition-colors">Logout</a>
+                        <a href="/auth/logout" class="block px-3 py-2 text-red-600 hover:bg-gray-50 rounded-md transition-colors">Logout</a>
                     </div>
                 <?php else: ?>
                     <div class="border-t pt-2 mt-2">
-                        <a href="auth/login" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Login</a>
-                        <a href="auth/register" class="block px-3 py-2 bg-gold-400 text-white hover:bg-gold-500 rounded-md transition-colors mx-3">Register</a>
+                        <a href="/auth/login" class="block px-3 py-2 text-gray-700 hover:text-gold-400 hover:bg-gray-50 rounded-md transition-colors">Login</a>
+                        <a href="/auth/register" class="block px-3 py-2 bg-gold-400 text-white hover:bg-gold-500 rounded-md transition-colors mx-3">Register</a>
                     </div>
                 <?php endif; ?>
             </div>
@@ -359,11 +359,11 @@
                 <div>
                     <h3 class="text-lg font-semibold text-gold-400 mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="<?php echo rtrim(BASE_URL, '/'); ?>/" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="products" class="text-gray-300 hover:text-white transition-colors">Gallery</a></li>
-                        <li><a href="packages" class="text-gray-300 hover:text-white transition-colors">Packages</a></li>
-                        <li><a href="testimonials" class="text-gray-300 hover:text-white transition-colors">Reviews</a></li>
-                        <li><a href="contact" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/products" class="text-gray-300 hover:text-white transition-colors">Gallery</a></li>
+                        <li><a href="/packages" class="text-gray-300 hover:text-white transition-colors">Packages</a></li>
+                        <li><a href="/testimonials" class="text-gray-300 hover:text-white transition-colors">Reviews</a></li>
+                        <li><a href="/contact" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
                     </ul>
                 </div>
                 

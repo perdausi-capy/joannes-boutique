@@ -10,7 +10,7 @@ $pageTitle = "Gallery | Joanne's";
             Explore our stunning collection of elegant gowns and sophisticated suits. 
             Each piece is crafted with attention to detail and timeless style.
         </p>
-        <form method="get" action="products" class="flex items-center justify-center gap-2 max-w-md mx-auto">
+        <form method="get" action="/products" class="flex items-center justify-center gap-2 max-w-md mx-auto">
             <input type="text" name="search" value="<?php echo htmlspecialchars($searchTerm ?? ''); ?>" placeholder="Search our gallery..." class="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-gold-400 focus:border-transparent">
             <button class="px-6 py-2 bg-gold-400 text-white rounded-lg hover:bg-gold-500 transition-colors">Search</button>
         </form>
@@ -21,13 +21,13 @@ $pageTitle = "Gallery | Joanne's";
             <h2 class="text-lg font-semibold mb-4 text-gray-800">Filter by Category</h2>
             <ul class="space-y-3">
                 <li>
-                    <a href="products" class="block px-3 py-2 rounded-lg transition-colors <?php echo empty($currentCategory) ? 'bg-gold-100 text-gold-700 font-medium' : 'text-gray-700 hover:bg-gray-50'; ?>">
+                    <a href="/products" class="block px-3 py-2 rounded-lg transition-colors <?php echo empty($currentCategory) ? 'bg-gold-100 text-gold-700 font-medium' : 'text-gray-700 hover:bg-gray-50'; ?>">
                         <i class="fas fa-th-large mr-2"></i>All Collections
                     </a>
                 </li>
                 <?php foreach (($categories ?? []) as $category): ?>
                     <li>
-                        <a href="products?category=<?php echo urlencode($category['slug']); ?>" class="block px-3 py-2 rounded-lg transition-colors <?php echo (($currentCategory ?? '') === $category['slug']) ? 'bg-gold-100 text-gold-700 font-medium' : 'text-gray-700 hover:bg-gray-50'; ?>">
+                        <a href="/products?category=<?php echo urlencode($category['slug']); ?>" class="block px-3 py-2 rounded-lg transition-colors <?php echo (($currentCategory ?? '') === $category['slug']) ? 'bg-gold-100 text-gold-700 font-medium' : 'text-gray-700 hover:bg-gray-50'; ?>">
                             <i class="fas fa-tag mr-2"></i><?php echo htmlspecialchars($category['name']); ?>
                         </a>
                     </li>
@@ -54,7 +54,7 @@ $pageTitle = "Gallery | Joanne's";
                                 <?php endif; ?>
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <a href="products/show/<?php echo (int)$product['id']; ?>" class="bg-white text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                        <a href="/products/show/<?php echo (int)$product['id']; ?>" class="bg-white text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
                                             View Details
                                         </a>
                                     </div>
@@ -70,7 +70,7 @@ $pageTitle = "Gallery | Joanne's";
                                     <?php endif; ?>
                                 </div>
                                 <div class="flex gap-2">
-                                    <a href="products/show/<?php echo (int)$product['id']; ?>" class="flex-1 px-3 py-2 border border-gold-400 text-gold-400 rounded-lg hover:bg-gold-400 hover:text-white text-sm text-center transition-colors">View</a>
+                                    <a href="/products/show/<?php echo (int)$product['id']; ?>" class="flex-1 px-3 py-2 border border-gold-400 text-gold-400 rounded-lg hover:bg-gold-400 hover:text-white text-sm text-center transition-colors">View</a>
                                     <button onclick="addToCart(<?php echo (int)$product['id']; ?>, 1, true)" class="flex-1 px-3 py-2 bg-gold-400 text-white rounded-lg hover:bg-gold-500 text-sm transition-colors">Add to Cart</button>
                                 </div>
                             </div>
@@ -81,7 +81,7 @@ $pageTitle = "Gallery | Joanne's";
                 <?php if (!empty($totalPages) && $totalPages > 1): ?>
                     <div class="mt-12 flex items-center justify-center gap-2">
                         <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                            <a href="products?page=<?php echo $p; ?><?php echo $currentCategory ? '&category=' . urlencode($currentCategory) : ''; ?><?php echo $searchTerm ? '&search=' . urlencode($searchTerm) : ''; ?>"
+                            <a href="/products?page=<?php echo $p; ?><?php echo $currentCategory ? '&category=' . urlencode($currentCategory) : ''; ?><?php echo $searchTerm ? '&search=' . urlencode($searchTerm) : ''; ?>"
                                class="px-4 py-2 rounded-lg border transition-colors <?php echo (($currentPage ?? 1) == $p) ? 'bg-gold-400 text-white border-gold-400' : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gold-400'; ?>">
                                 <?php echo $p; ?>
                             </a>

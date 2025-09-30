@@ -33,6 +33,8 @@ require __DIR__ . '/../src/Controllers/CartController.php';
 require __DIR__ . '/../src/Controllers/AdminController.php';
 require __DIR__ . '/../src/Controllers/BookingController.php';
 require __DIR__ . '/../src/Controllers/PackageController.php';
+require __DIR__ . '/../src/Controllers/TestimonialController.php';
+require __DIR__ . '/../src/Controllers/ContactController.php';
 
 // Initialize session/CSRF
 CSRF::init();
@@ -123,6 +125,10 @@ switch (true) {
 		(new AuthController())->orders();
 		break;
 
+	case $path === '/auth/change-password' && $_SERVER['REQUEST_METHOD'] === 'POST':
+		(new AuthController())->changePassword();
+		break;
+
 	case $path === '/booking' && $_SERVER['REQUEST_METHOD'] === 'GET':
 		(new BookingController())->index();
 		break;
@@ -143,13 +149,49 @@ switch (true) {
 		(new AdminController())->bookings();
 		break;
 
-	case $path === '/admin/orders':
-		(new AdminController())->orders();
-		break;
+    case $path === '/admin/orders':
+        (new AdminController())->orders();
+        break;
 
-	default:
-		http_response_code(404);
-		echo '404 Not Found';
+    case $path === '/testimonials':
+        (new TestimonialController())->index();
+        break;
+
+    case $path === '/contact' && $_SERVER['REQUEST_METHOD'] === 'GET':
+        (new ContactController())->index();
+        break;
+
+    case $path === '/contact' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new ContactController())->submit();
+        break;
+
+    case $path === '/testimonials/submit' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new TestimonialController())->submit();
+        break;
+
+    case $path === '/admin/testimonials':
+        (new AdminController())->testimonials();
+        break;
+
+    case $path === '/admin/users':
+        (new AdminController())->users();
+        break;
+
+    case $path === '/admin/testimonials/approve' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->approveTestimonial();
+        break;
+
+    case $path === '/admin/testimonials/reject' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->rejectTestimonial();
+        break;
+
+    case preg_match('#^/admin/testimonials/view/(\d+)$#', $path, $m):
+        (new AdminController())->viewTestimonial((int)$m[1]);
+        break;
+
+    default:
+        http_response_code(404);
+        echo '404 Not Found';
 }
 
 

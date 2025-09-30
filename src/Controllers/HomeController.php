@@ -10,7 +10,7 @@ class HomeController {
     
     public function index() {
         $featuredProducts = $this->productModel->getFeatured(6);
-        $testimonials = $this->testimonialModel->getApproved(3);
+        $testimonials = $this->testimonialModel->findPublic();
         
         $content = $this->renderHome($featuredProducts, $testimonials);
         $this->render('layout', [

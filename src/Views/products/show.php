@@ -18,8 +18,8 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                     
                     <!-- Fallback for when Alpine.js doesn't load -->
                     <noscript>
-                        <div class="h-96 bg-gray-100 flex items-center justify-center">
-                            <img src="uploads/<?php echo htmlspecialchars($images[0]); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="max-h-96 w-full object-contain bg-white">
+                        <div class="h-[500px] bg-gray-100 flex items-center justify-center">
+                            <img src="uploads/<?php echo htmlspecialchars($images[0]); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="max-h-[500px] w-full object-contain bg-white">
                         </div>
                     </noscript>
                     
@@ -27,16 +27,32 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                         window.productImages = <?php echo json_encode(array_values($images)); ?>;
                     </script>
                     <div x-data="{ idx: 0, imgs: window.productImages }" class="relative">
-                        <div class="h-96 bg-gray-100 flex items-center justify-center">
-                            <img :src="'/uploads/' + imgs[idx]" alt="<?php echo htmlspecialchars($product['name']); ?>" class="max-h-96 w-full object-contain bg-white" 
-                                 @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex';">
-                            <div class="h-96 w-full flex items-center justify-center bg-gray-100 text-7xl text-gold-400" style="display:none;">👗</div>
+                        <div class="h-[500px] bg-gray-100 flex items-center justify-center relative">
+                            <img :src="'/uploads/' + imgs[idx]" 
+                                 :alt="product.name || 'Product Image'" 
+                                 class="max-h-[500px] w-full object-contain bg-white transition-opacity duration-300"
+                                 @load="$el.style.opacity = '1'"
+                                 @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex';"
+                                 style="opacity: 0;">
+                            <div class="absolute inset-0 flex items-center justify-center bg-gray-100 text-7xl text-gold-400" style="display:none;">
+                                <span>👗</span>
+                                <p class="text-sm text-gray-600 ml-2">Image not available</p>
+                            </div>
+                            <!-- Loading spinner -->
+                            <div class="absolute inset-0 flex items-center justify-center bg-gray-100 text-gold-400" x-show="!imgs || imgs.length === 0">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
+                            </div>
                         </div>
                         <button @click="idx = (idx - 1 + imgs.length) % imgs.length" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow"><i class="fas fa-chevron-left"></i></button>
                         <button @click="idx = (idx + 1) % imgs.length" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow"><i class="fas fa-chevron-right"></i></button>
                         <div class="flex gap-2 p-3 justify-center bg-gray-50 border-t">
                             <template x-for="(thumb, t) in imgs" :key="t">
-                                <img :src="'/uploads/' + thumb" @click="idx = t" class="w-16 h-16 object-cover rounded border cursor-pointer" :class="{ 'ring-2 ring-gold-400': idx === t }">
+                                <img :src="'/uploads/' + thumb" 
+                                     @click="idx = t" 
+                                     class="w-16 h-16 object-contain bg-white rounded border cursor-pointer transition-all duration-200" 
+                                     :class="{ 'ring-2 ring-gold-400': idx === t }"
+                                     @error="$el.style.display='none'"
+                                     :alt="'Thumbnail ' + (t + 1)">
                             </template>
                         </div>
                     </div>
@@ -64,9 +80,9 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <?php foreach ($relatedProducts as $rp): ?>
                         <a href="/products/show/<?php echo (int)$rp['id']; ?>" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition">
-                            <div class="bg-gray-100 h-40 flex items-center justify-center">
+                            <div class="bg-gray-100 h-48 flex items-center justify-center">
                                 <?php if (!empty($rp['image'])): ?>
-                                    <img src="uploads/<?php echo htmlspecialchars($rp['image']); ?>" alt="<?php echo htmlspecialchars($rp['name']); ?>" class="h-40 w-full object-cover">
+                                    <img src="uploads/<?php echo htmlspecialchars($rp['image']); ?>" alt="<?php echo htmlspecialchars($rp['name']); ?>" class="h-48 w-full object-contain bg-white">
                                 <?php else: ?>
                                     <div class="text-4xl text-gold-400">👗</div>
                                 <?php endif; ?>

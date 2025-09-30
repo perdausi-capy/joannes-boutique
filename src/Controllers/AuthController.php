@@ -117,30 +117,71 @@ class AuthController {
     
     public function profile() {
         Auth::requireLogin();
-        
+
+        $userId = $_SESSION['user_id'];
+        $orderModel = new Order();
+        $bookingModel = new Booking();
+        $testimonialModel = new Testimonial();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             CSRF::requireToken();
-            
             $data = [
                 'first_name' => trim($_POST['first_name'] ?? ''),
                 'last_name' => trim($_POST['last_name'] ?? ''),
                 'phone' => trim($_POST['phone'] ?? '')
             ];
-            
             if (!empty($data['first_name']) && !empty($data['last_name'])) {
-                $this->userModel->update($_SESSION['user_id'], $data);
+                $this->userModel->update($userId, $data);
                 $success = 'Profile updated successfully!';
             } else {
                 $error = 'First name and last name are required';
             }
         }
-        
+
         $user = Auth::user();
+        $orders = $orderModel->getUserOrders($userId);
+        $bookings = method_exists($bookingModel, 'findByUserId') ? $bookingModel->findByUserId($userId) : [];
+        $testimonials = method_exists($testimonialModel, 'findByUserId') ? $testimonialModel->findByUserId($userId) : [];
+
         $this->render('auth/profile', [
             'user' => $user,
+            'orders' => $orders,
+            'bookings' => $bookings,
+            'testimonials' => $testimonials,
             'success' => $success ?? null,
-            'error' => $error ?? null
+            'error' => $error ?? null,
+            'pw_success' => $_SESSION['pw_success'] ?? null,
+            'pw_error' => $_SESSION['pw_error'] ?? null
         ]);
+        unset($_SESSION['pw_success'], $_SESSION['pw_error']);
+    }
+
+    public function changePassword() {
+        Auth::requireLogin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /auth/profile');
+            exit;
+        }
+        CSRF::requireToken();
+        $user = Auth::user();
+        $oldPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        if (empty($oldPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $_SESSION['pw_error'] = 'All password fields are required.';
+        } elseif (!password_verify($oldPassword, $user['password'])) {
+            $_SESSION['pw_error'] = 'Current password is incorrect.';
+        } elseif (strlen($newPassword) < 6) {
+            $_SESSION['pw_error'] = 'New password must be at least 6 characters.';
+        } elseif ($newPassword !== $confirmPassword) {
+            $_SESSION['pw_error'] = 'New passwords do not match.';
+        } else {
+            $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+            $this->userModel->update($user['id'], ['password' => $hashed]);
+            $_SESSION['pw_success'] = 'Password changed successfully!';
+        }
+        header('Location: /auth/profile');
+        exit;
     }
     
     public function orders() {

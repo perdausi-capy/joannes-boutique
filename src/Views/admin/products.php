@@ -25,13 +25,13 @@
                 <a href="/admin/products" class="block px-4 py-3 text-gray-700 bg-blue-50 border-r-2 border-blue-500">
                     <i class="fas fa-box mr-2"></i> Products
                 </a>
-                <a href="/admin/orders.php" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                <a href="/admin/orders" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-shopping-cart mr-2"></i> Orders
                 </a>
-                <a href="/admin/users.php" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                <a href="/admin/users" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-users mr-2"></i> Users
                 </a>
-                <a href="/admin/testimonials.php" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                <a href="/admin/testimonials" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-comments mr-2"></i> Testimonials
                 </a>
                 <a href="/admin/booking" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
