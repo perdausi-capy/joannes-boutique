@@ -18,23 +18,25 @@ require __DIR__ . '/../src/Models/BaseModel.php';
 require __DIR__ . '/../src/Models/User.php';
 require __DIR__ . '/../src/Models/Product.php';
 require __DIR__ . '/../src/Models/Category.php';
-require __DIR__ . '/../src/Models/Cart.php';
 require __DIR__ . '/../src/Models/Order.php';
 require __DIR__ . '/../src/Models/OrderItem.php';
 require __DIR__ . '/../src/Models/Testimonial.php';
 require __DIR__ . '/../src/Models/Booking.php';
 require __DIR__ . '/../src/Models/ProductImage.php';
+require __DIR__ . '/../src/Models/Package.php';
+require __DIR__ . '/../src/Models/BookingOrder.php';
 
 // Controllers
 require __DIR__ . '/../src/Controllers/HomeController.php';
 require __DIR__ . '/../src/Controllers/ProductController.php';
 require __DIR__ . '/../src/Controllers/AuthController.php';
-require __DIR__ . '/../src/Controllers/CartController.php';
 require __DIR__ . '/../src/Controllers/AdminController.php';
 require __DIR__ . '/../src/Controllers/BookingController.php';
 require __DIR__ . '/../src/Controllers/PackageController.php';
 require __DIR__ . '/../src/Controllers/TestimonialController.php';
 require __DIR__ . '/../src/Controllers/ContactController.php';
+require __DIR__ . '/../src/Controllers/PaymentController.php';
+require __DIR__ . '/../src/Controllers/CategoryController.php';
 
 // Initialize session/CSRF
 CSRF::init();
@@ -59,6 +61,9 @@ switch (true) {
 	case $path === '/packages':
 		(new PackageController())->index();
 		break;
+    case preg_match('#^/packages/view/(\d+)$#', $path, $m):
+        (new PackageController())->show((int)$m[1]);
+        break;
 
 	case preg_match('#^/products/show/(\d+)$#', $path, $m):
 		(new ProductController())->show((int)$m[1]);
@@ -67,42 +72,6 @@ switch (true) {
 	case $path === '/api/search':
 		header('Content-Type: application/json');
 		echo (new ProductController())->searchAPI();
-		break;
-
-	case $path === '/cart':
-		(new CartController())->index();
-		break;
-
-	case $path === '/cart/add':
-		header('Content-Type: application/json');
-		echo (new CartController())->addToCart();
-		break;
-
-	case $path === '/cart/update':
-		header('Content-Type: application/json');
-		echo (new CartController())->updateCart();
-		break;
-
-	case $path === '/cart/remove':
-		header('Content-Type: application/json');
-		echo (new CartController())->removeFromCart();
-		break;
-
-	case $path === '/api/cart-count':
-		header('Content-Type: application/json');
-		echo (new CartController())->getCartCount();
-		break;
-
-	case $path === '/cart/checkout' && $_SERVER['REQUEST_METHOD'] === 'GET':
-		(new CartController())->checkout();
-		break;
-
-	case $path === '/cart/checkout' && $_SERVER['REQUEST_METHOD'] === 'POST':
-		(new CartController())->processCheckout();
-		break;
-
-	case $path === '/cart/buy-now' && $_SERVER['REQUEST_METHOD'] === 'POST':
-		(new CartController())->buyNow();
 		break;
 
 	case $path === '/auth/login':
@@ -149,6 +118,10 @@ switch (true) {
 		(new AdminController())->bookings();
 		break;
 
+    case $path === '/admin/packages':
+        (new AdminController())->managePackages();
+        break;
+
     case $path === '/admin/orders':
         (new AdminController())->orders();
         break;
@@ -177,6 +150,18 @@ switch (true) {
         (new AdminController())->users();
         break;
 
+    case preg_match('#^/admin/users/view/(\d+)$#', $path, $m):
+        (new AdminController())->viewUser((int)$m[1]);
+        break;
+
+    case $path === '/admin/users/delete' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->deleteUser();
+        break;
+
+    case $path === '/admin/users/suspend' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->suspendUser();
+        break;
+
     case $path === '/admin/testimonials/approve' && $_SERVER['REQUEST_METHOD'] === 'POST':
         (new AdminController())->approveTestimonial();
         break;
@@ -185,8 +170,83 @@ switch (true) {
         (new AdminController())->rejectTestimonial();
         break;
 
+    case $path === '/admin/testimonials/delete' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->deleteTestimonial();
+        break;
+
     case preg_match('#^/admin/testimonials/view/(\d+)$#', $path, $m):
         (new AdminController())->viewTestimonial((int)$m[1]);
+        break;
+
+    // Admin booking routes
+    case $path === '/admin/bookings':
+        (new AdminController())->manageBookings();
+        break;
+    
+    case preg_match('#^/admin/bookings/view/(\d+)$#', $path, $m):
+        (new AdminController())->viewBooking((int)$m[1]);
+        break;
+    
+    case preg_match('#^/admin/bookings/verify/(\d+)$#', $path, $m):
+        (new AdminController())->verifyBooking((int)$m[1]);
+        break;
+
+    // Payment routes
+    case $path === '/rental/create':
+        (new PaymentController())->createRentalOrder();
+        break;
+    
+    case $path === '/package/book':
+        (new PaymentController())->createPackageBooking();
+        break;
+    
+    case $path === '/payment':
+        (new PaymentController())->showPayment();
+        break;
+    
+    case $path === '/payment/process':
+        (new PaymentController())->processPayment();
+        break;
+    
+    case $path === '/payment-confirmation':
+        (new PaymentController())->showConfirmation();
+        break;
+
+    case $path === '/api/check_availability':
+        require __DIR__ . '/../api/check_availability.php';
+        break;
+
+    // Category management routes
+    case $path === '/admin/categories':
+        (new CategoryController())->index();
+        break;
+    
+    case $path === '/admin/categories/create':
+        (new CategoryController())->create();
+        break;
+    
+    case $path === '/admin/categories/store' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new CategoryController())->store();
+        break;
+    
+    case preg_match('#^/admin/categories/edit/(\d+)$#', $path, $m):
+        (new CategoryController())->edit((int)$m[1]);
+        break;
+    
+    case preg_match('#^/admin/categories/update/(\d+)$#', $path, $m) && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new CategoryController())->update((int)$m[1]);
+        break;
+    
+    case preg_match('#^/admin/categories/delete/(\d+)$#', $path, $m):
+        (new CategoryController())->delete((int)$m[1]);
+        break;
+    
+    case preg_match('#^/admin/categories/toggle/(\d+)$#', $path, $m) && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new CategoryController())->toggle((int)$m[1]);
+        break;
+
+    case $path === '/admin/categories':
+        (new CategoryController())->index();
         break;
 
     default:

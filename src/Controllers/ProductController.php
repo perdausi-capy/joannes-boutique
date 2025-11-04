@@ -36,6 +36,23 @@ class ProductController {
         $categories = $this->categoryModel->findAll();
         $totalPages = ceil($totalProducts / $limit);
         
+        // Check if this is an AJAX request
+        if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'products' => $products,
+                'pagination' => [
+                    'current_page' => $page,
+                    'total_pages' => $totalPages,
+                    'total' => $totalProducts,
+                    'per_page' => $limit
+                ]
+            ]);
+            exit;
+        }
+        
+        // Regular page render
         $this->render('products/index', [
             'products' => $products,
             'categories' => $categories,
@@ -54,6 +71,7 @@ class ProductController {
             $this->render('404');
             return;
         }
+        
         // Load extra images
         require_once __DIR__ . '/../Models/ProductImage.php';
         $imageModel = new ProductImage();
@@ -66,10 +84,79 @@ class ProductController {
             $relatedProducts = array_filter($relatedProducts, fn($p) => $p['id'] != $id);
         }
         
+        // Calculate penalty information for overdue rentals of this product
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        require_once __DIR__ . '/../Utils/Auth.php';
+        
+        $bookingOrderModel = new BookingOrder();
+        $penaltyInfo = [
+            'has_overdue' => false,
+            'overdue_rentals' => [],
+            'total_penalty' => 0,
+            'user_overdue_order' => null
+        ];
+        
+        // Get overdue rentals for this product
+        $userId = Auth::isLoggedIn() ? $_SESSION['user_id'] : null;
+        $overdueRentals = $bookingOrderModel->getOverdueRentalsForItem($id, $userId);
+        
+        if (!empty($overdueRentals)) {
+            $penaltyInfo['has_overdue'] = true;
+            $penaltyInfo['overdue_rentals'] = $overdueRentals;
+            
+            // Calculate total penalty for current user (if logged in)
+            if ($userId) {
+                foreach ($overdueRentals as $rental) {
+                    if ($rental['user_id'] == $userId && 
+                        (empty($rental['is_penalty_paid']) || $rental['is_penalty_paid'] == 0)) {
+                        $penaltyInfo['total_penalty'] += $rental['current_penalty'];
+                        // Store the most recent overdue order for the user
+                        if (!$penaltyInfo['user_overdue_order']) {
+                            $penaltyInfo['user_overdue_order'] = $rental;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check if there's an order_id in URL (for payment display)
+        $orderId = isset($_GET['order_id']) ? (int)$_GET['order_id'] : null;
+        $currentOrder = null;
+        $orderPenaltyInfo = null;
+        
+        if ($orderId) {
+            $currentOrder = $bookingOrderModel->getOrderWithDetails($orderId);
+            
+            // Verify order belongs to this product and current user
+            if ($currentOrder && 
+                $currentOrder['item_id'] == $id && 
+                $currentOrder['order_type'] == 'rental') {
+                
+                // Calculate penalty for this specific order
+                $orderPenaltyInfo = $bookingOrderModel->calculatePenalty($orderId);
+                
+                // Auto-update penalty in database
+                if ($orderPenaltyInfo['is_overdue']) {
+                    $bookingOrderModel->calculateAndUpdatePenalty($orderId);
+                    // Refresh order data
+                    $currentOrder = $bookingOrderModel->getOrderWithDetails($orderId);
+                }
+                
+                // Get total amount due (rental + penalty if unpaid)
+                $totalDue = $bookingOrderModel->getTotalAmountDue($orderId);
+                $orderPenaltyInfo['total_due'] = $totalDue;
+            } else {
+                $currentOrder = null; // Invalid order for this product
+            }
+        }
+        
         $this->render('products/show', [
             'product' => $product,
             'productImages' => $productImages,
-            'relatedProducts' => $relatedProducts
+            'relatedProducts' => $relatedProducts,
+            'penaltyInfo' => $penaltyInfo,
+            'currentOrder' => $currentOrder,
+            'orderPenaltyInfo' => $orderPenaltyInfo
         ]);
     }
     
@@ -100,5 +187,3 @@ class ProductController {
         include $viewsDir . '/layout.php';
     }
 }
-
-

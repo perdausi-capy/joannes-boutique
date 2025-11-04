@@ -2,32 +2,25 @@
 class PackageController {
     private $productModel;
     private $categoryModel;
+    private $packageModel;
     
     public function __construct() {
         $this->productModel = new Product();
         $this->categoryModel = new Category();
+        require_once __DIR__ . '/../Models/Package.php';
+        $this->packageModel = new Package();
     }
     
     public function index() {
-        // Get all categories to group products by package types
-        $categories = $this->categoryModel->findAll();
-        
-        // Get featured products for each category
-        $packages = [];
-        foreach ($categories as $category) {
-            $products = $this->productModel->findByCategory($category['id'], 6);
-            if (!empty($products)) {
-                $packages[] = [
-                    'category' => $category,
-                    'products' => $products
-                ];
-            }
-        }
-        
-        $this->render('packages/index', [
-            'packages' => $packages,
-            'categories' => $categories
-        ]);
+        // Show dynamic packages stored in DB
+        $packages = $this->packageModel->findAll();
+        $this->render('packages/index', [ 'packages' => $packages ]);
+    }
+
+    public function show(int $id) {
+        $package = $this->packageModel->findById($id);
+        if (!$package) { http_response_code(404); echo 'Package not found'; return; }
+        $this->render('packages/show', [ 'package' => $package ]);
     }
     
     private function render($template, $data = []) {

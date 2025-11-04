@@ -18,19 +18,23 @@ class AuthController {
             } else {
                 $user = $this->userModel->authenticate($email, $password);
                 if ($user) {
-                    Auth::login($user);
-
-                    // Redirect based on role
-                    if ($user['role'] === 'admin') {
-                        $redirect = 'admin/dashboard';
+                    if (!empty($user['is_suspended'])) {
+                        $error = 'Your account has been suspended. Please contact support.';
                     } else {
-                        $redirect = $_GET['redirect'] ?? 'auth/profile';
-                        if (str_starts_with($redirect, '/')) {
-                            $redirect = ltrim($redirect, '/');
+                        Auth::login($user);
+
+                        // Redirect based on role
+                        if ($user['role'] === 'admin') {
+                            $redirect = 'admin/dashboard';
+                        } else {
+                            $redirect = $_GET['redirect'] ?? 'auth/profile';
+                            if (str_starts_with($redirect, '/')) {
+                                $redirect = ltrim($redirect, '/');
+                            }
                         }
+                        header('Location: ' . BASE_URL . $redirect);
+                        exit;
                     }
-                    header('Location: ' . BASE_URL . $redirect);
-                    exit;
                 } else {
                     $error = 'Invalid email or password';
                 }
@@ -159,7 +163,7 @@ class AuthController {
     public function changePassword() {
         Auth::requireLogin();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /auth/profile');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/auth/profile');
             exit;
         }
         CSRF::requireToken();
@@ -180,7 +184,7 @@ class AuthController {
             $this->userModel->update($user['id'], ['password' => $hashed]);
             $_SESSION['pw_success'] = 'Password changed successfully!';
         }
-        header('Location: /auth/profile');
+        header('Location: ' . rtrim(BASE_URL, '/') . '/auth/profile');
         exit;
     }
     
@@ -189,8 +193,16 @@ class AuthController {
         
         $orderModel = new Order();
         $orders = $orderModel->getUserOrders($_SESSION['user_id']);
-        
-        $this->render('auth/orders', ['orders' => $orders]);
+
+        // Include booking (rental/package) orders as well
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+        $bookings = $bookingOrderModel->findAllWithDetailsByUser($_SESSION['user_id']);
+
+        $this->render('auth/orders', [
+            'orders' => $orders,
+            'bookings' => $bookings,
+        ]);
     }
     
     private function render($template, $data = []) {

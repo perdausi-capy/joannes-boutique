@@ -1,0 +1,90 @@
+<?php
+/**
+ * Debug Products Endpoint
+ * Place this in: /public/debug_products.php
+ * 
+ * Access: http://localhost/joannes-boutique/public/debug_products.php?search=gown
+ */
+
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Start output buffering
+ob_start();
+
+try {
+    echo "=== DEBUG START ===\n\n";
+    
+    // 1. Check if we can load config
+    echo "1. Loading config...\n";
+    require_once __DIR__ . '/../config/config.php';
+    echo "   ✓ Config loaded\n\n";
+    
+    // 2. Check if we can load database
+    echo "2. Loading database...\n";
+    require_once __DIR__ . '/../config/database.php';
+    echo "   ✓ Database loaded\n\n";
+    
+    // 3. Check if we can get database connection
+    echo "3. Getting database connection...\n";
+    $db = Database::getInstance();
+    $pdo = $db->getConnection();
+    echo "   ✓ Database connection established\n\n";
+    
+    // 4. Check if we can load models
+    echo "4. Loading Product model...\n";
+    require_once __DIR__ . '/../src/Models/Product.php';
+    $productModel = new Product();
+    echo "   ✓ Product model loaded\n\n";
+    
+    echo "5. Loading Category model...\n";
+    require_once __DIR__ . '/../src/Models/Category.php';
+    $categoryModel = new Category();
+    echo "   ✓ Category model loaded\n\n";
+    
+    // 5. Test search functionality
+    $searchTerm = $_GET['search'] ?? 'gown';
+    echo "6. Testing search for: '$searchTerm'\n";
+    $results = $productModel->search($searchTerm, 5);
+    echo "   ✓ Search completed. Found " . count($results) . " results\n\n";
+    
+    // 6. Show results
+    echo "7. Sample results:\n";
+    foreach ($results as $i => $product) {
+        echo "   Product " . ($i + 1) . ": " . $product['name'] . " (ID: " . $product['id'] . ")\n";
+    }
+    echo "\n";
+    
+    // 7. Test JSON encoding
+    echo "8. Testing JSON encoding...\n";
+    $jsonData = [
+        'success' => true,
+        'products' => $results,
+        'pagination' => [
+            'current_page' => 1,
+            'total_pages' => 1,
+            'total' => count($results)
+        ]
+    ];
+    
+    $json = json_encode($jsonData, JSON_UNESCAPED_UNICODE);
+    if ($json === false) {
+        throw new Exception("JSON encoding failed: " . json_last_error_msg());
+    }
+    echo "   ✓ JSON encoded successfully\n\n";
+    
+    echo "=== DEBUG END ===\n\n";
+    echo "=== JSON OUTPUT ===\n";
+    echo $json;
+    
+} catch (Exception $e) {
+    echo "\n\n❌ ERROR: " . $e->getMessage() . "\n";
+    echo "Stack trace:\n";
+    echo $e->getTraceAsString();
+}
+
+// Output everything
+$output = ob_get_clean();
+header('Content-Type: text/plain');
+echo $output;

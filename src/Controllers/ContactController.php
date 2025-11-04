@@ -12,7 +12,7 @@ class ContactController {
     
     public function submit() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /contact');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/contact');
             exit;
         }
         
@@ -32,7 +32,7 @@ class ContactController {
         // Basic validation
         if (empty($data['name']) || empty($data['email']) || empty($data['message'])) {
             $_SESSION['contact_message'] = ['type' => 'error', 'text' => 'Please fill in all required fields.'];
-            header('Location: /contact');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/contact');
             exit;
         }
         
@@ -42,11 +42,11 @@ class ContactController {
             $contactModel->create($data);
             
             $_SESSION['contact_message'] = ['type' => 'success', 'text' => 'Thank you for your message! We will get back to you soon.'];
-            header('Location: /contact');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/contact');
             exit;
         } catch (Exception $e) {
             $_SESSION['contact_message'] = ['type' => 'error', 'text' => 'Failed to send message. Please try again.'];
-            header('Location: /contact');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/contact');
             exit;
         }
     }

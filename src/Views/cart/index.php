@@ -23,12 +23,12 @@ $pageTitle = "Your Cart | Joanne's";
                 <div class="text-xl font-bold text-gold-400">$<?php echo number_format($cartTotal, 2); ?></div>
             </div>
             <div class="mt-6 text-right">
-                <a href="/cart/checkout" class="px-6 py-3 bg-gold-400 text-white rounded-lg hover:bg-gold-500">Checkout</a>
+                <a href="cart/checkout" class="px-6 py-3 bg-gold-400 text-white rounded-lg hover:bg-gold-500">Checkout</a>
             </div>
         <?php endif; ?>
     </div>
     <div class="mt-6">
-        <a href="/products" class="text-gold-400 hover:text-gold-500">Continue Shopping</a>
+        <a href="products" class="text-gold-400 hover:text-gold-500">Continue Shopping</a>
     </div>
     
 </div>

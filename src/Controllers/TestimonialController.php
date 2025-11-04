@@ -17,7 +17,7 @@ class TestimonialController {
     
     public function submit() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /testimonials');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/testimonials');
             exit;
         }
         
@@ -34,18 +34,18 @@ class TestimonialController {
         // Basic validation
         if (empty($data['name']) || empty($data['message'])) {
             $_SESSION['testimonial_message'] = ['type' => 'error', 'text' => 'Please fill in all required fields.'];
-            header('Location: /testimonials');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/testimonials');
             exit;
         }
         
         try {
             $this->testimonialModel->create($data);
             $_SESSION['testimonial_message'] = ['type' => 'success', 'text' => 'Thank you for your review! It will be published after moderation.'];
-            header('Location: /testimonials');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/testimonials');
             exit;
         } catch (Exception $e) {
             $_SESSION['testimonial_message'] = ['type' => 'error', 'text' => 'Failed to submit review. Please try again.'];
-            header('Location: /testimonials');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/testimonials');
             exit;
         }
     }

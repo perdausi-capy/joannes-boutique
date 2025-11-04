@@ -2,6 +2,7 @@
 abstract class BaseModel {
     protected $db;
     protected $table;
+    protected $primaryKey = 'id';
     
     public function __construct() {
         $database = new Database();
@@ -24,7 +25,8 @@ abstract class BaseModel {
     }
     
     public function findById($id) {
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        $pk = $this->primaryKey;
+        $sql = "SELECT * FROM {$this->table} WHERE {$pk} = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -50,7 +52,8 @@ abstract class BaseModel {
     public function update($id, array $data) {
         $setParts = array_map(fn($col) => "$col = :$col", array_keys($data));
         
-        $sql = "UPDATE {$this->table} SET " . implode(', ', $setParts) . " WHERE id = :id";
+        $pk = $this->primaryKey;
+        $sql = "UPDATE {$this->table} SET " . implode(', ', $setParts) . " WHERE {$pk} = :id";
         
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -62,7 +65,8 @@ abstract class BaseModel {
     }
     
     public function delete($id) {
-        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+        $pk = $this->primaryKey;
+        $sql = "DELETE FROM {$this->table} WHERE {$pk} = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();

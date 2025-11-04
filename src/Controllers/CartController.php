@@ -1,223 +1,311 @@
 <?php
-class CartController {
-    private $cartModel;
-    private $productModel;
-    private $orderModel;
-    
+// src/Controllers/CategoryController.php
+
+require_once __DIR__ . '/../Utils/Auth.php';
+require_once __DIR__ . '/../Models/Category.php';
+
+class CategoryController {
+    private $categoryModel;
+    private $baseUrl;
+
     public function __construct() {
-        $this->cartModel = new Cart();
-        $this->productModel = new Product();
-        $this->orderModel = new Order();
+        // Ensure session is started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Detect base URL dynamically
+        $this->baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '/joannes-boutique/public';
+
+        // Restrict access to admins only
+        Auth::requireAdmin();
+
+        $this->categoryModel = new Category();
     }
-    
+
+    /**
+     * List all categories and show inline form
+     */
     public function index() {
-        $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = session_id();
-        
-        $cartItems = $this->cartModel->getCartItems($userId, $sessionId);
-        $cartTotal = $this->cartModel->getCartTotal($userId, $sessionId);
-        
-        $this->render('cart/index', [
-            'cartItems' => $cartItems,
-            'cartTotal' => $cartTotal
-        ]);
-    }
-    
-    public function addToCart() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return json_encode(['success' => false, 'message' => 'Method not allowed']);
+        $categories = $this->categoryModel->findAll();
+        $editCategory = null;
+
+        // Check if editing
+        if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+            $editCategory = $this->categoryModel->find((int)$_GET['id']);
         }
-        
-        CSRF::requireToken();
-        
-        $productId = intval($_POST['product_id'] ?? 0);
-        $quantity = intval($_POST['quantity'] ?? 1);
-        
-        if ($productId <= 0 || $quantity <= 0) {
-            return json_encode(['success' => false, 'message' => 'Invalid product or quantity']);
-        }
-        
-        $product = $this->productModel->findById($productId);
-        if (!$product) {
-            return json_encode(['success' => false, 'message' => 'Product not found']);
-        }
-        
-        if ($product['stock_quantity'] < $quantity) {
-            return json_encode(['success' => false, 'message' => 'Insufficient stock']);
-        }
-        
-        $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = session_id();
-        
-        try {
-            $this->cartModel->addItem($userId, $sessionId, $productId, $quantity);
-            $cartCount = $this->cartModel->getCartCount($userId, $sessionId);
+
+        // Handle form submissions
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_GET['action'] ?? 'create';
             
-            return json_encode([
-                'success' => true,
-                'message' => 'Product added to cart',
-                'cart_count' => $cartCount
-            ]);
-        } catch (Exception $e) {
-            return json_encode(['success' => false, 'message' => 'Failed to add product to cart']);
-        }
-    }
-    
-    public function updateCart() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return json_encode(['success' => false, 'message' => 'Method not allowed']);
-        }
-        
-        CSRF::requireToken();
-        
-        $itemId = intval($_POST['item_id'] ?? 0);
-        $quantity = intval($_POST['quantity'] ?? 1);
-        
-        if ($quantity <= 0) {
-            return $this->removeFromCart();
-        }
-        
-        try {
-            $this->cartModel->update($itemId, ['quantity' => $quantity]);
-            return json_encode(['success' => true, 'message' => 'Cart updated']);
-        } catch (Exception $e) {
-            return json_encode(['success' => false, 'message' => 'Failed to update cart']);
-        }
-    }
-    
-    public function removeFromCart() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return json_encode(['success' => false, 'message' => 'Method not allowed']);
-        }
-        
-        CSRF::requireToken();
-        
-        $itemId = intval($_POST['item_id'] ?? 0);
-        
-        try {
-            $this->cartModel->delete($itemId);
-            return json_encode(['success' => true, 'message' => 'Item removed from cart']);
-        } catch (Exception $e) {
-            return json_encode(['success' => false, 'message' => 'Failed to remove item']);
-        }
-    }
-    
-    public function getCartCount() {
-        $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = session_id();
-        
-        $count = $this->cartModel->getCartCount($userId, $sessionId);
-        return json_encode(['count' => $count]);
-    }
-    
-    public function checkout() {
-        Auth::requireLogin();
-        
-        $userId = $_SESSION['user_id'];
-        $sessionId = session_id();
-        
-        $cartItems = $this->cartModel->getCartItems($userId, $sessionId);
-        $cartTotal = $this->cartModel->getCartTotal($userId, $sessionId);
-        
-        if (empty($cartItems)) {
-            header('Location: /cart');
-            exit;
-        }
-        
-        $user = Auth::user();
-        
-        $this->render('cart/checkout', [
-            'cartItems' => $cartItems,
-            'cartTotal' => $cartTotal,
-            'user' => $user
-        ]);
-    }
-    
-    public function processCheckout() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /cart/checkout');
-            exit;
-        }
-        
-        CSRF::requireToken();
-        Auth::requireLogin();
-        
-        $userId = $_SESSION['user_id'];
-        $sessionId = session_id();
-        
-        $cartItems = $this->cartModel->getCartItems($userId, $sessionId);
-        
-        if (empty($cartItems)) {
-            header('Location: /cart');
-            exit;
-        }
-        
-        $orderData = [
-            'shipping_address' => trim($_POST['shipping_address'] ?? ''),
-            'billing_address' => trim($_POST['billing_address'] ?? ''),
-            'payment_method' => $_POST['payment_method'] ?? 'bank_transfer',
-            'notes' => trim($_POST['notes'] ?? '')
-        ];
-        
-        // Validate required fields
-        if (empty($orderData['shipping_address'])) {
-            $error = 'Shipping address is required';
-            $this->render('cart/checkout', [
-                'cartItems' => $cartItems,
-                'cartTotal' => $this->cartModel->getCartTotal($userId, $sessionId),
-                'user' => Auth::user(),
-                'error' => $error,
-                'orderData' => $orderData
-            ]);
+            if ($action === 'create') {
+                $this->store();
+            } elseif ($action === 'edit' && isset($_GET['id'])) {
+                $this->update((int)$_GET['id']);
+            }
             return;
         }
-        
-        try {
-            $orderId = $this->orderModel->createOrder($userId, $cartItems, $orderData);
-            $this->cartModel->clearCart($userId, $sessionId);
-            
-            header("Location: /auth/orders?success=Order placed successfully!");
-            exit;
-        } catch (Exception $e) {
-            $error = 'Failed to process order. Please try again.';
-            $this->render('cart/checkout', [
-                'cartItems' => $cartItems,
-                'cartTotal' => $this->cartModel->getCartTotal($userId, $sessionId),
-                'user' => Auth::user(),
-                'error' => $error,
-                'orderData' => $orderData
-            ]);
+
+        // Handle delete action
+        if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+            $this->delete((int)$_GET['id']);
+            return;
         }
+
+        // Handle toggle action
+        if (isset($_GET['action']) && $_GET['action'] === 'toggle' && isset($_GET['id'])) {
+            $this->toggle((int)$_GET['id']);
+            return;
+        }
+
+        // Add product count to each category
+        foreach ($categories as &$category) {
+            $category['product_count'] = $this->categoryModel->getProductCount($category['id']);
+        }
+
+        // Include the view
+        include __DIR__ . '/../Views/admin/categories.php';
     }
-    
-    public function buyNow() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /products');
+
+    /**
+     * Store new category
+     */
+    private function store() {
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+
+        // Validate name
+        if (empty($name)) {
+            $_SESSION['error'] = 'Category name is required';
+            header('Location: ' . $this->baseUrl . '/admin/categories');
             exit;
         }
-        $productId = intval($_POST['product_id'] ?? 0);
-        if ($productId <= 0) { header('Location: /products'); exit; }
-        $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = session_id();
-        try {
-            $this->cartModel->addItem($userId, $sessionId, $productId, 1);
-            header('Location: /cart/checkout');
-            exit;
-        } catch (Exception $e) {
-            header('Location: /products?error=Unable to buy now');
+
+        // Auto-generate slug if empty
+        if (empty($slug)) {
+            $slug = $this->generateSlug($name);
+        }
+
+        // Check if slug already exists
+        if ($this->categoryModel->findBySlug($slug)) {
+            $_SESSION['error'] = 'Category with this name already exists';
+            header('Location: ' . $this->baseUrl . '/admin/categories');
             exit;
         }
+
+        // Handle image upload
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $imagePath = $this->handleImageUpload($_FILES['image']);
+            if (!$imagePath) {
+                $_SESSION['error'] = 'Failed to upload image. Please check file type and size.';
+                header('Location: ' . $this->baseUrl . '/admin/categories');
+                exit;
+            }
+        }
+
+        // Prepare data
+        $data = [
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description,
+            'image' => $imagePath,
+            'is_active' => $is_active
+        ];
+
+        // Create category
+        if ($this->categoryModel->create($data)) {
+            $_SESSION['success'] = 'Category created successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to create category';
+        }
+
+        header('Location: ' . $this->baseUrl . '/admin/categories');
+        exit;
     }
-    
-    private function render($template, $data = []) {
-        extract($data);
-        $pageTitle = 'Shopping Cart | Joanne\'s';
+
+    /**
+     * Update category
+     */
+    private function update($id) {
+        $category = $this->categoryModel->find($id);
+        if (!$category) {
+            $_SESSION['error'] = 'Category not found';
+            header('Location: ' . $this->baseUrl . '/admin/categories');
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+
+        // Validate name
+        if (empty($name)) {
+            $_SESSION['error'] = 'Category name is required';
+            header('Location: ' . $this->baseUrl . '/admin/categories?action=edit&id=' . $id);
+            exit;
+        }
+
+        // Auto-generate slug if empty
+        if (empty($slug)) {
+            $slug = $this->generateSlug($name);
+        }
+
+        // Check if slug exists (excluding current category)
+        $existingCategory = $this->categoryModel->findBySlug($slug);
+        if ($existingCategory && $existingCategory['id'] != $id) {
+            $_SESSION['error'] = 'Another category with this name already exists';
+            header('Location: ' . $this->baseUrl . '/admin/categories?action=edit&id=' . $id);
+            exit;
+        }
+
+        // Handle image upload
+        $imagePath = $category['image'];
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $newImagePath = $this->handleImageUpload($_FILES['image']);
+            if ($newImagePath) {
+                // Delete old image
+                if ($imagePath && file_exists(__DIR__ . '/../../public/uploads/' . $imagePath)) {
+                    unlink(__DIR__ . '/../../public/uploads/' . $imagePath);
+                }
+                $imagePath = $newImagePath;
+            }
+        }
+
+        // Prepare data
+        $data = [
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description,
+            'image' => $imagePath,
+            'is_active' => $is_active
+        ];
+
+        // Update category
+        if ($this->categoryModel->update($id, $data)) {
+            $_SESSION['success'] = 'Category updated successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to update category';
+        }
+
+        header('Location: ' . $this->baseUrl . '/admin/categories');
+        exit;
+    }
+
+    /**
+     * Delete category
+     */
+    private function delete($id) {
+        $category = $this->categoryModel->find($id);
+
+        if (!$category) {
+            $_SESSION['error'] = 'Category not found';
+            header('Location: ' . $this->baseUrl . '/admin/categories');
+            exit;
+        }
+
+        // Check if category has products
+        $productCount = $this->categoryModel->getProductCount($id);
+        if ($productCount > 0) {
+            $_SESSION['error'] = "Cannot delete category with {$productCount} product(s). Please reassign or delete products first.";
+            header('Location: ' . $this->baseUrl . '/admin/categories');
+            exit;
+        }
+
+        // Delete image file
+        if ($category['image'] && file_exists(__DIR__ . '/../../public/uploads/' . $category['image'])) {
+            unlink(__DIR__ . '/../../public/uploads/' . $category['image']);
+        }
+
+        // Delete category
+        if ($this->categoryModel->delete($id)) {
+            $_SESSION['success'] = 'Category deleted successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to delete category';
+        }
+
+        header('Location: ' . $this->baseUrl . '/admin/categories');
+        exit;
+    }
+
+    /**
+     * Toggle active status
+     */
+    private function toggle($id) {
+        // Set JSON header
+        header('Content-Type: application/json');
+
+        $category = $this->categoryModel->find($id);
+
+        if (!$category) {
+            echo json_encode(['success' => false, 'message' => 'Category not found']);
+            exit;
+        }
+
+        $newStatus = $category['is_active'] ? 0 : 1;
+
+        if ($this->categoryModel->update($id, ['is_active' => $newStatus])) {
+            echo json_encode(['success' => true, 'status' => $newStatus]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+        }
+        exit;
+    }
+
+    /**
+     * Generate slug from string
+     */
+    private function generateSlug($string) {
+        // Convert to lowercase
+        $slug = strtolower(trim($string));
         
-        $viewsDir = dirname(__DIR__) . '/Views';
-        ob_start();
-        include $viewsDir . "/{$template}.php";
-        $content = ob_get_clean();
+        // Replace non-alphanumeric characters with hyphens
+        $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
         
-        include $viewsDir . '/layout.php';
+        // Replace multiple hyphens with single hyphen
+        $slug = preg_replace('/-+/', '-', $slug);
+        
+        // Remove hyphens from start and end
+        return trim($slug, '-');
+    }
+
+    /**
+     * Handle image upload
+     */
+    private function handleImageUpload($file) {
+        // Allowed file types
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $maxSize = 5 * 1024 * 1024; // 5MB
+
+        // Validate file type and size
+        if (!in_array($file['type'], $allowedTypes)) {
+            return false;
+        }
+
+        if ($file['size'] > $maxSize) {
+            return false;
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = __DIR__ . '/../../public/uploads/categories/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'cat_' . uniqid() . '.' . $extension;
+        $filepath = $uploadDir . $filename;
+
+        // Move uploaded file
+        if (move_uploaded_file($file['tmp_name'], $filepath)) {
+            return 'categories/' . $filename;
+        }
+
+        return false;
     }
 }

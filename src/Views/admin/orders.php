@@ -1,64 +1,378 @@
+<?php ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Admin - Orders</title>
-	<script src="https://cdn.tailwindcss.com"></script>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Bookings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom right, #fafafa, #f1f1f1); }
+        [x-cloak] { display: none !important; }
+        * { scrollbar-width: thin; scrollbar-color: #d4af37 transparent; }
+        *::-webkit-scrollbar { width: 8px; }
+        *::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 6px; }
+
+        .font-serif-elegant { font-family: 'Cormorant Garamond', serif; }
+        .sidebar-gradient { background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%); }
+        .nav-link { transition: all 0.3s ease; position: relative; }
+        .nav-link.active { background: rgba(212,175,55,0.15); color: #d4af37; font-weight: 600; }
+        .nav-link:hover { background: rgba(212,175,55,0.1); padding-left: 1.75rem; }
+        .logo-text { background: linear-gradient(135deg, #d4af37, #f4d03f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .tab-btn { transition: all 0.3s ease; }
+        .tab-btn.active { color: #d4af37; font-weight: 700; }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, #d4af37, #f4d03f);
+            border-radius: 3px;
+        }
+
+        .table-row { transition: all 0.25s ease; }
+        .table-row:hover { background-color: rgba(212,175,55,0.05); transform: scale(1.003); }
+        .table-row.overdue { border-left: 4px solid #ef4444; }
+
+        .status-badge {
+            display: inline-flex; align-items: center;
+            font-weight: 600; font-size: 0.75rem;
+            border-radius: 9999px; padding: 0.375rem 0.75rem;
+        }
+        .action-btn { transition: all 0.2s ease; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        footer { display: none; }
+        
+        .refresh-indicator { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .penalty-highlight {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-	<div class="flex">
-		<div class="w-64 bg-white shadow-lg">
-			<div class="p-4 border-b">
-				<h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
-			</div>
-			<nav class="mt-4">
-				<a href="/admin" class="block px-4 py-3 text-gray-700 hover:bg-gray-50"><i class="fas fa-dashboard mr-2"></i> Dashboard</a>
-				<a href="/admin/products" class="block px-4 py-3 text-gray-700 hover:bg-gray-50"><i class="fas fa-box mr-2"></i> Products</a>
-				<a href="/admin/orders" class="block px-4 py-3 text-gray-700 bg-blue-50 border-r-2 border-blue-500"><i class="fas fa-shopping-cart mr-2"></i> Orders</a>
-				<a href="/admin/bookings" class="block px-4 py-3 text-gray-700 hover:bg-gray-50"><i class="fas fa-calendar-alt mr-2"></i> Bookings</a>
-			</nav>
-		</div>
-		<div class="flex-1 overflow-y-auto">
-			<header class="bg-white shadow-sm border-b px-6 py-4">
-				<h1 class="text-2xl font-semibold text-gray-800">Orders</h1>
-			</header>
-			<main class="p-6">
-				<div class="bg-white rounded-lg shadow p-6">
-					<h2 class="text-lg font-semibold mb-4">Recent Orders</h2>
-					<div class="overflow-x-auto">
-						<table class="min-w-full divide-y divide-gray-200">
-							<thead class="bg-gray-50">
-								<tr>
-									<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-									<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-									<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-									<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-									<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-gray-200">
-								<?php foreach ($orders as $order): ?>
-								<tr>
-									<td class="px-4 py-2 text-sm font-medium text-gray-900"><?php echo htmlspecialchars($order['order_number'] ?? ('#' . $order['id'])); ?></td>
-									<td class="px-4 py-2 text-sm text-gray-700"><?php $u = $userModel->findById($order['user_id']); echo $u ? htmlspecialchars($u['first_name'] . ' ' . $u['last_name']) : 'N/A'; ?></td>
-									<td class="px-4 py-2 text-sm text-gray-900">$<?php echo number_format($order['total_amount'], 2); ?></td>
-									<td class="px-4 py-2 text-sm capitalize"><?php echo htmlspecialchars($order['status']); ?></td>
-									<td class="px-4 py-2 text-sm text-gray-500"><?php echo date('M j, Y', strtotime($order['created_at'])); ?></td>
-								</tr>
-								<?php endforeach; ?>
-								<?php if (empty($orders)): ?>
-								<tr>
-									<td colspan="5" class="px-4 py-6 text-center text-gray-500">No orders found.</td>
-								</tr>
-								<?php endif; ?>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</main>
-		</div>
-	</div>
+
+<body>
+    <div class="flex">
+    <?php include __DIR__ . '/partials/sidebar.php'; ?>
+
+        <div class="flex-1 ml-72" x-data="bookingManager()" x-init="init()">
+            <header class="header-gradient shadow-sm border-b px-8 py-6 sticky top-0 z-10 bg-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-serif-elegant font-bold text-gray-900">Booking Management</h1>
+                        <p class="text-gray-600 mt-1">Manage gown, suit, and package bookings with penalty tracking</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
+                            <div class="text-xs text-gray-500">Total Bookings</div>
+                            <div class="text-xl font-bold text-gray-900" x-text="bookings.length"></div>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-2 shadow-sm">
+                            <div class="text-xs text-red-600">Overdue Orders</div>
+                            <div class="text-xl font-bold text-red-600" x-text="overdueCount"></div>
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-sm">
+                            <div class="text-xs text-yellow-700">Outstanding Penalties</div>
+                            <div class="text-xl font-bold text-yellow-700">₱<span x-text="totalPenalties.toFixed(2)"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-8 space-y-8">
+                <?php if (!empty($message)): ?>
+                    <div class="alert-success p-4 text-white rounded-xl flex items-center gap-3 shadow-lg fade-in bg-green-500">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                        <span class="font-semibold"><?= $message ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <section class="bg-white rounded-2xl shadow-lg border border-gray-100 fade-in">
+                    <div class="px-8 py-6 border-b border-gray-100">
+                        <h2 class="text-xl font-serif-elegant font-bold text-gray-900 mb-4">Filter Bookings</h2>
+                        <div class="flex flex-wrap gap-4">
+                            <template x-for="tab in tabs" :key="tab.value">
+                                <button @click="currentTab = tab.value"
+                                        :class="currentTab === tab.value ? 'active' : ''"
+                                        class="tab-btn px-6 py-3 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 relative">
+                                    <i :class="tab.icon + ' mr-2'"></i>
+                                    <span x-text="tab.label"></span>
+                                    (<span x-text="tab.count()"></span>)
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-2xl shadow-xl border border-gray-100 fade-in overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-serif-elegant font-bold text-gray-900">Bookings List</h2>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Showing <span x-text="filteredBookings.length"></span> 
+                                <span x-text="currentTab === 'all' ? 'booking(s)' : currentTab + ' booking(s)'"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <template x-for="head in tableHeaders" :key="head">
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider" x-text="head"></th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <template x-for="booking in filteredBookings" :key="booking.order_id">
+                                    <tr class="table-row" :class="{ 'overdue penalty-highlight': booking.penaltyInfo && booking.penaltyInfo.isOverdue && !booking.is_penalty_paid }">
+                                        <td class="px-6 py-4 font-mono font-semibold text-gray-900" x-text="'#' + booking.order_id"></td>
+                                        <td class="px-6 py-4">
+                                            <span class="status-badge" 
+                                                  :class="booking.order_type === 'rental' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'">
+                                                <i :class="booking.order_type === 'rental' ? 'fas fa-tshirt' : 'fas fa-gift'" class="mr-1"></i>
+                                                <span x-text="booking.order_type.charAt(0).toUpperCase() + booking.order_type.slice(1)"></span>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-600">
+                                                    <span class="text-white font-bold" x-text="booking.contact_name.charAt(0).toUpperCase()"></span>
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium text-gray-900" x-text="booking.contact_name"></div>
+                                                    <div class="text-xs text-gray-500" x-text="booking.contact_email"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">
+                                            <template x-if="booking.order_type === 'rental'">
+                                                <div>
+                                                    <i class="fas fa-calendar-alt text-yellow-600 mr-1"></i>
+                                                    <span x-text="new Date(booking.rental_start).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})"></span> - 
+                                                    <span x-text="new Date(booking.rental_end).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})"></span>
+                                                    <div class="text-xs text-gray-500 mt-1" x-show="booking.size">
+                                                        <i class="fas fa-ruler text-gray-400 mr-1"></i>
+                                                        Size: <span x-text="booking.size"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template x-if="booking.order_type === 'package'">
+                                                <div>
+                                                    <i class="fas fa-calendar-check text-purple-600 mr-1"></i>
+                                                    Event: <span x-text="new Date(booking.event_date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})"></span>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        <i class="fas fa-users text-gray-400 mr-1"></i>
+                                                        Guests: <span x-text="booking.quantity"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </td>
+                                        <td class="px-6 py-4 font-bold text-gray-900">₱<span x-text="parseFloat(booking.total_amount).toFixed(2)"></span></td>
+                                        
+                                        <!-- Penalty Column -->
+                                        <td class="px-6 py-4">
+                                            <template x-if="booking.penaltyInfo && booking.penaltyInfo.isOverdue">
+                                                <div>
+                                                    <template x-if="!booking.is_penalty_paid">
+                                                        <div class="flex flex-col gap-1">
+                                                            <span class="status-badge bg-red-100 text-red-700">
+                                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                                ₱<span x-text="parseFloat(booking.penaltyInfo.amount).toFixed(2)"></span>
+                                                            </span>
+                                                            <span class="text-xs text-red-600 font-semibold">
+                                                                <span x-text="booking.penaltyInfo.daysLate"></span> day(s) late
+                                                            </span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="booking.is_penalty_paid">
+                                                        <span class="status-badge bg-green-100 text-green-700">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Paid
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!booking.penaltyInfo || !booking.penaltyInfo.isOverdue">
+                                                <span class="status-badge bg-gray-100 text-gray-600">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    No Penalty
+                                                </span>
+                                            </template>
+                                        </td>
+                                        
+                                        <!-- <td class="px-6 py-4">
+                                            <span class="status-badge"
+                                                  :class="{
+                                                      'bg-green-100 text-green-700': booking.payment_status === 'verified',
+                                                      'bg-blue-100 text-blue-700': booking.payment_status === 'paid',
+                                                      'bg-yellow-100 text-yellow-700': booking.payment_status === 'pending'
+                                                  }">
+                                                <i :class="{
+                                                    'fas fa-check-double': booking.payment_status === 'verified',
+                                                    'fas fa-check-circle': booking.payment_status === 'paid',
+                                                    'fas fa-clock': booking.payment_status === 'pending'
+                                                }" class="mr-1"></i>
+                                                <span x-text="booking.payment_status.charAt(0).toUpperCase() + booking.payment_status.slice(1)"></span>
+                                            </span>
+                                        </td> -->
+                                        <td class="px-6 py-4 text-sm text-gray-600" x-text="new Date(booking.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})"></td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-2">
+                                                <a :href="'admin/bookings/view/' + booking.order_id" class="action-btn px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold text-sm">
+                                                    <i class="fas fa-eye mr-1"></i> View
+                                                </a>
+                                                <template x-if="booking.payment_status === 'paid'">
+                                                    <form method="post" onsubmit="return confirm('Verify this payment?')">
+                                                        <input type="hidden" name="action" value="verify">
+                                                        <input type="hidden" name="order_id" :value="booking.order_id">
+                                                        <button type="submit" class="action-btn px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-semibold text-sm">
+                                                            <i class="fas fa-check mr-1"></i> Verify
+                                                        </button>
+                                                    </form>
+                                                </template>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+
+                                <tr x-show="filteredBookings.length === 0">
+                                    <td colspan="9" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fas fa-calendar-times text-gray-300 text-6xl mb-4"></i>
+                                            <p class="text-gray-500 font-medium text-lg">No bookings found</p>
+                                            <p class="text-gray-400 text-sm mt-1" x-text="'No ' + currentTab + ' bookings available'"></p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    function bookingManager() {
+        return {
+            currentTab: 'all',
+            bookings: <?= json_encode($bookings ?? []); ?>,
+            isRefreshing: false,
+            refreshInterval: null,
+            tabs: [
+                { label: 'All', icon: 'fas fa-list', value: 'all', count() { return window.thisParent.bookings.length; } },
+                { label: 'Overdue', icon: 'fas fa-exclamation-triangle', value: 'overdue', count() { return window.thisParent.bookings.filter(b => window.thisParent.calculatePenalty(b).isOverdue && !b.is_penalty_paid).length; } },
+                { label: 'Rentals', icon: 'fas fa-tshirt', value: 'rental', count() { return window.thisParent.bookings.filter(b => b.order_type === 'rental').length; } },
+                { label: 'Packages', icon: 'fas fa-gift', value: 'package', count() { return window.thisParent.bookings.filter(b => b.order_type === 'package').length; } }
+            ],
+            
+            calculatePenalty(booking) {
+                if (booking.order_type !== 'rental' || !booking.rental_end) {
+                    return { isOverdue: false, amount: 0, daysLate: 0 };
+                }
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const rentalEnd = new Date(booking.rental_end);
+                rentalEnd.setHours(0, 0, 0, 0);
+                
+                if (today <= rentalEnd || booking.is_returned) {
+                    return { isOverdue: false, amount: 0, daysLate: 0 };
+                }
+                
+                const daysLate = Math.floor((today - rentalEnd) / (1000 * 60 * 60 * 24));
+                const penaltyAmount = daysLate * 250;
+                
+                return {
+                    isOverdue: true,
+                    amount: penaltyAmount,
+                    daysLate: daysLate
+                };
+            },
+            
+            get filteredBookings() {
+                let filtered = this.bookings;
+                
+                // Apply penalty info to all bookings
+                filtered = filtered.map(b => ({
+                    ...b,
+                    penaltyInfo: this.calculatePenalty(b)
+                }));
+                
+                // Filter based on tab
+                if (this.currentTab === 'overdue') {
+                    filtered = filtered.filter(b => b.penaltyInfo.isOverdue && !b.is_penalty_paid);
+                } else if (this.currentTab === 'rental') {
+                    filtered = filtered.filter(b => b.order_type === 'rental');
+                } else if (this.currentTab === 'package') {
+                    // For packages, don't show penalty column data
+                    filtered = filtered.filter(b => b.order_type === 'package');
+                }
+                
+                // Sort: overdue first, but only for 'all', 'overdue', and 'rental' tabs
+                if (this.currentTab !== 'package') {
+                    return filtered.sort((a, b) => {
+                        if (a.penaltyInfo.isOverdue && !b.penaltyInfo.isOverdue) return -1;
+                        if (!a.penaltyInfo.isOverdue && b.penaltyInfo.isOverdue) return 1;
+                        return b.penaltyInfo.daysLate - a.penaltyInfo.daysLate;
+                    });
+                }
+                
+                // For packages, sort by date only
+                return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            },
+            
+            get tableHeaders() {
+                return ['Order #', 'Type', 'Customer', 'Details', 'Amount', 'Penalty', 'Date', 'Actions'];
+            },
+            
+            get overdueCount() {
+                return this.bookings.filter(b => {
+                    const penalty = this.calculatePenalty(b);
+                    return penalty.isOverdue && !b.is_penalty_paid;
+                }).length;
+            },
+            
+            get totalPenalties() {
+                return this.bookings.reduce((sum, b) => {
+                    const penalty = this.calculatePenalty(b);
+                    return sum + (penalty.isOverdue && !b.is_penalty_paid ? penalty.amount : 0);
+                }, 0);
+            },
+            
+            async refreshBookings() {
+                try {
+                    const response = await fetch('../api/get_bookings.php');
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        this.bookings = result.data;
+                    }
+                } catch (error) {
+                    console.error('Error refreshing bookings:', error);
+                }
+            },
+            
+            init() {
+                window.thisParent = this;
+                this.isRefreshing = true;
+                this.refreshBookings();
+                this.refreshInterval = setInterval(() => this.refreshBookings(), 30000); // 30 seconds
+            },
+            
+            destroy() {
+                if (this.refreshInterval) clearInterval(this.refreshInterval);
+            }
+        }
+    }
+    </script>
 </body>
 </html>

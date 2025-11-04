@@ -166,11 +166,30 @@ class AdminController {
 
     public function bookings() {
         Auth::requireAdmin();
-        require_once __DIR__ . '/../Models/Booking.php';
-        $bookingModel = new Booking();
-        $bookings = $bookingModel->findRecent(50);
-        $this->render('admin/bookings', ['bookings' => $bookings]);
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+    
+        $message = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $orderId = (int)($_POST['order_id'] ?? 0);
+    
+            if ($action === 'verify' && $orderId) {
+                $message = $bookingOrderModel->verifyPayment($orderId)
+                    ? '✓ Booking verified successfully'
+                    : '✗ Failed to verify booking';
+            }
+        }
+    
+        $paidBookings = $bookingOrderModel->findAllPaid();
+        $verifiedBookings = $bookingOrderModel->findAllVerified();
+        $bookings = array_merge($paidBookings, $verifiedBookings);
+        usort($bookings, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+    
+        $this->render('admin/orders', ['message' => $message, 'bookings' => $bookings]);
+
     }
+    
 
     public function orders() {
         Auth::requireAdmin();
@@ -196,6 +215,102 @@ class AdminController {
         $userModel = new User();
         $users = $userModel->findAll();
         $this->render('admin/users', ['users' => $users]);
+    }
+
+    public function viewUser(int $id) {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/User.php';
+        $userModel = new User();
+        $user = $userModel->findById($id);
+        if (!$user) { http_response_code(404); echo 'User not found'; return; }
+        $this->render('admin/user-view', ['user' => $user]);
+    }
+
+    public function deleteUser() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['success'=>false]); return; }
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        if (!$id) { echo json_encode(['success'=>false,'message'=>'Invalid user ID']); return; }
+        require_once __DIR__ . '/../Models/User.php';
+        $userModel = new User();
+        try {
+            $ok = $userModel->delete($id);
+            echo json_encode(['success'=>(bool)$ok]);
+        } catch (Exception $e) {
+            echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
+        }
+    }
+
+    public function suspendUser() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['success'=>false]); return; }
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        $suspend = isset($input['suspend']) ? (bool)$input['suspend'] : false;
+        if (!$id) { echo json_encode(['success'=>false,'message'=>'Invalid user ID']); return; }
+        require_once __DIR__ . '/../Models/User.php';
+        $userModel = new User();
+        try {
+            $ok = $userModel->suspend($id, $suspend);
+            echo json_encode(['success'=>(bool)$ok]);
+        } catch (Exception $e) {
+            echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
+        }
+    }
+
+    public function managePackages() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/Package.php';
+        $packageModel = new Package();
+        $message = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? 'create';
+            $id = isset($_POST['package_id']) ? (int)$_POST['package_id'] : null;
+
+            // Handle background upload
+            $backgroundFile = null;
+            if (!empty($_FILES['background_image']) && $_FILES['background_image']['error'] === UPLOAD_ERR_OK) {
+                $ext = pathinfo($_FILES['background_image']['name'], PATHINFO_EXTENSION);
+                $backgroundFile = uniqid('pkg_bg_', true) . '.' . $ext;
+                move_uploaded_file($_FILES['background_image']['tmp_name'], UPLOAD_PATH . $backgroundFile);
+            }
+
+            // Build inclusions dynamically from posted keys
+            $inclusions = [];
+            if (!empty($_POST['inclusions']) && is_array($_POST['inclusions'])) {
+                foreach ($_POST['inclusions'] as $key => $arr) {
+                    $label = trim($_POST['inclusion_labels'][$key] ?? $key);
+                    $items = array_values(array_filter(array_map('trim', $arr), fn($v) => $v !== ''));
+                    $inclusions[$label] = $items;
+                }
+            }
+            $data = [
+                'package_name' => trim($_POST['package_name'] ?? ''),
+                'hotel_name' => trim($_POST['hotel_name'] ?? ''),
+                'hotel_address' => trim($_POST['hotel_address'] ?? ''),
+                'hotel_description' => trim($_POST['hotel_description'] ?? ''),
+                'number_of_guests' => (int)($_POST['number_of_guests'] ?? 0),
+                'price' => (float)($_POST['price'] ?? 0),
+                'freebies' => trim($_POST['freebies'] ?? ''),
+                'inclusions' => $inclusions,
+            ];
+            if ($backgroundFile) { $data['background_image'] = $backgroundFile; }
+
+            if ($action === 'delete' && $id) {
+                $packageModel->deletePackage($id);
+                $message = '✓ Package deleted';
+            } elseif ($action === 'edit' && $id) {
+                $packageModel->updatePackage($id, $data);
+                $message = '✓ Package updated';
+            } else {
+                $packageModel->createPackage($data);
+                $message = '✓ Package created';
+            }
+        }
+
+        $packages = $packageModel->findAll();
+        $this->render('admin/packages', ['message' => $message, 'packages' => $packages]);
     }
 
     public function approveTestimonial() {
@@ -254,6 +369,29 @@ class AdminController {
         }
     }
 
+    public function deleteTestimonial() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            return;
+        }
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = $input['id'] ?? null;
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'Invalid testimonial ID']);
+            return;
+        }
+        require_once __DIR__ . '/../Models/Testimonial.php';
+        $testimonialModel = new Testimonial();
+        try {
+            $ok = $testimonialModel->delete((int)$id);
+            echo json_encode(['success' => (bool)$ok]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     public function viewTestimonial($id) {
         Auth::requireAdmin();
         
@@ -269,6 +407,95 @@ class AdminController {
         
         $this->render('admin/testimonial-view', ['testimonial' => $testimonial]);
     }
+    
+    public function manageBookings() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+        
+        $message = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $orderId = (int)($_POST['order_id'] ?? 0);
+            
+            if ($action === 'verify' && $orderId) {
+                if ($bookingOrderModel->verifyPayment($orderId)) {
+                    $message = '✓ Booking verified successfully';
+                } else {
+                    $message = '✗ Failed to verify booking';
+                }
+            }
+        }
+        
+        $paidBookings = $bookingOrderModel->findAllPaid();
+        $verifiedBookings = $bookingOrderModel->findAllVerified();
+        $bookings = array_merge($paidBookings, $verifiedBookings);
+        usort($bookings, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        
+        $this->render('admin/orders', ['message' => $message, 'bookings' => $bookings]);
+
+    }
+    
+    public function viewBooking($id) {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+        
+        $booking = $bookingOrderModel->getOrderWithDetails($id);
+        
+        if (!$booking) {
+            http_response_code(404);
+            echo 'Booking not found';
+            return;
+        }
+        
+        $this->render('admin/booking-view', ['booking' => $booking]);
+    }
+    
+    public function verifyBooking($id) {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+        
+        $bookingOrderModel->verifyPayment($id);
+        
+        header('Location: ' . BASE_URL . 'admin/orders');
+        exit;
+    }
+
+    public function resolvePenalty() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo 'Method not allowed';
+            return;
+        }
+    
+        $orderId = isset($_POST['order_id']) ? (int)$_POST['order_id'] : 0;
+        if (!$orderId) {
+            $_SESSION['message'] = 'Invalid order ID';
+            header('Location: ' . BASE_URL . 'admin/orders');
+            exit;
+        }
+    
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+    
+        try {
+            $ok = $bookingOrderModel->resolvePenalty($orderId); 
+            $_SESSION['message'] = $ok ? '✓ Penalty resolved successfully' : '✗ Failed to resolve penalty';
+        } catch (Exception $e) {
+            $_SESSION['message'] = 'Error: ' . $e->getMessage();
+        }
+    
+        // Redirect back to bookings page
+        header('Location: ' . BASE_URL . 'admin/orders');
+        exit;
+    }
+    
+    
 
     private function render($template, $data = []) {
         extract($data);

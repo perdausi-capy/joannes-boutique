@@ -19,10 +19,14 @@ class Migration {
         $this->createProductImagesTable();
         $this->createOrdersTable();
         $this->createOrderItemsTable();
+        $this->createBookingOrdersTable();
         $this->createCartTable();
         $this->createTestimonialsTable();
         $this->createContactMessagesTable();
         $this->createBookingsTable();
+        $this->createPackagesTable();
+        $this->alterPackagesAddBackground();
+        $this->alterPackagesAddPrice();
         
         echo "All migrations completed successfully!\n";
     }
@@ -129,6 +133,33 @@ class Migration {
         echo "✓ Order items table created\n";
     }
     
+    private function createBookingOrdersTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS booking_orders (
+            order_id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NULL,
+            order_type ENUM('rental','package') NOT NULL,
+            item_id INT NOT NULL,
+            event_date DATE NULL,
+            rental_start DATE NULL,
+            rental_end DATE NULL,
+            total_amount DECIMAL(10,2) NOT NULL,
+            payment_status ENUM('pending','paid','verified') DEFAULT 'pending',
+            payment_method VARCHAR(50) DEFAULT 'GCash',
+            reference_number VARCHAR(100) NULL,
+            proof_image VARCHAR(255) NULL,
+            contact_name VARCHAR(100) NULL,
+            contact_email VARCHAR(100) NULL,
+            contact_phone VARCHAR(20) NULL,
+            quantity INT DEFAULT 1,
+            size VARCHAR(50) NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        )";
+        
+        $this->db->exec($sql);
+        echo "✓ Booking orders table created\n";
+    }
+    
     private function createCartTable() {
         $sql = "CREATE TABLE IF NOT EXISTS cart (
             id INT PRIMARY KEY AUTO_INCREMENT,
@@ -199,6 +230,40 @@ class Migration {
         
         $this->db->exec($sql);
         echo "✓ Bookings table created\n";
+    }
+
+    private function createPackagesTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS packages (
+            package_id INT AUTO_INCREMENT PRIMARY KEY,
+            package_name VARCHAR(255),
+            hotel_name VARCHAR(255),
+            hotel_address TEXT,
+            hotel_description TEXT,
+            number_of_guests INT,
+            inclusions JSON,
+            freebies TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )";
+        $this->db->exec($sql);
+        echo "✓ Packages table created\n";
+    }
+
+    private function alterPackagesAddBackground() {
+        try {
+            $this->db->exec("ALTER TABLE packages ADD COLUMN background_image VARCHAR(255) NULL");
+            echo "✓ Packages table altered (background_image)\n";
+        } catch (PDOException $e) {
+            // Likely already exists
+        }
+    }
+    
+    private function alterPackagesAddPrice() {
+        try {
+            $this->db->exec("ALTER TABLE packages ADD COLUMN price DECIMAL(10,2) NULL");
+            echo "✓ Packages table altered (price)\n";
+        } catch (PDOException $e) {
+            // Likely already exists
+        }
     }
 }
 

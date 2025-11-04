@@ -20,7 +20,8 @@ class Auth {
     
     public static function requireLogin() {
         if (!self::isLoggedIn()) {
-            header('Location: /auth/login');
+            $base = rtrim(BASE_URL, '/');
+            header('Location: ' . $base . '/auth/login');
             exit;
         }
     }

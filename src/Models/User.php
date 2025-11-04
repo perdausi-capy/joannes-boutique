@@ -30,4 +30,18 @@ class User extends BaseModel {
         }
         return false;
     }
+
+    public function ensureSuspendedColumn() {
+        // Add is_suspended column if it doesn't exist
+        $result = $this->db->query("SHOW COLUMNS FROM {$this->table} LIKE 'is_suspended'");
+        $exists = $result && $result->fetch();
+        if (!$exists) {
+            $this->db->exec("ALTER TABLE {$this->table} ADD COLUMN is_suspended TINYINT(1) NOT NULL DEFAULT 0 AFTER role");
+        }
+    }
+
+    public function suspend(int $userId, bool $suspend): bool {
+        $this->ensureSuspendedColumn();
+        return $this->update($userId, ['is_suspended' => $suspend ? 1 : 0]);
+    }
 }

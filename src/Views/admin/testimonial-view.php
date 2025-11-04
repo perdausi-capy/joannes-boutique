@@ -10,50 +10,201 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .font-serif-elegant {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        
+        .sidebar-gradient {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(to bottom, #d4af37, #f4d03f);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+        
+        .nav-link:hover {
+            background: rgba(212, 175, 55, 0.1);
+            padding-left: 1.5rem;
+        }
+        
+        .nav-link.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: #d4af37;
+            font-weight: 600;
+        }
+        
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .gradient-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+        }
+        
+        .gradient-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        }
+        
+        .gradient-green {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+        
+        .gradient-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+        }
+        
+        .gradient-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+        }
+        
+        .gradient-orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        
+        .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        footer{
+            display: none;
+        }
+        .stat-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .table-row {
+            transition: all 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background: rgba(212, 175, 55, 0.05);
+            transform: scale(1.01);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .header-gradient {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(249, 250, 251, 1) 100%);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo-text {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .action-link {
+            transition: all 0.2s ease;
+        }
+        
+        .action-link:hover {
+            transform: translateX(3px);
+        }
+        nav{
+            display:block;
+        }
+    </style>
 <body class="bg-gray-100 min-h-screen">
     <div class="flex">
         <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-lg">
-            <div class="p-4 border-b">
-                <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
-                <p class="text-sm text-gray-600">Welcome, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></p>
-            </div>
-            <nav class="mt-4">
-                <a href="/admin/dashboard" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-dashboard mr-2"></i> Dashboard
-                </a>
-                <a href="/admin/products" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-box mr-2"></i> Products
-                </a>
-                <a href="/admin/orders" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-shopping-cart mr-2"></i> Orders
-                </a>
-                <a href="/admin/users" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-users mr-2"></i> Users
-                </a>
-                <a href="/admin/testimonials" class="block px-4 py-3 text-gray-700 bg-blue-50 border-r-2 border-blue-500">
-                    <i class="fas fa-comments mr-2"></i> Testimonials
-                </a>
-                <a href="/admin/bookings" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-calendar-alt mr-2"></i> Bookings
-                </a>
-                <a href="/" class="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                    <i class="fas fa-globe mr-2"></i> View Website
-                </a>
-                <a href="/auth/logout" class="block px-4 py-3 text-red-600 hover:bg-gray-50">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                </a>
-            </nav>
-        </div>
+        <?php include __DIR__ . '/partials/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto ml-72">
             <header class="bg-white shadow-sm border-b px-6 py-4">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-4">
-                        <a href="/admin/testimonials" class="text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-arrow-left mr-2"></i> Back to Testimonials
-                        </a>
+                    
                         <h1 class="text-2xl font-semibold text-gray-800"> Testimonial Details</h1>
                     </div>
                 </div>
@@ -116,7 +267,7 @@
 
                         <!-- Actions -->
                         <div class="flex justify-end space-x-3">
-                            <a href="/admin/testimonials" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                            <a href="<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
                                 <i class="fas fa-arrow-left mr-2"></i> Back to List
                             </a>
                             <?php if ($testimonial['status'] === 'pending'): ?>
@@ -144,7 +295,7 @@
     <script>
         function approveTestimonial(id) {
             if (confirm('Are you sure you want to approve this testimonial?')) {
-                fetch('/admin/testimonials/approve', {
+                fetch('<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials/approve', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -156,7 +307,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('Testimonial approved successfully! It will now appear on the homepage.');
-                        window.location.href = '/admin/testimonials';
+                        window.location.href = '<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials';
                     } else {
                         alert('Error updating testimonial: ' + (data.message || 'Unknown error'));
                     }
@@ -166,7 +317,7 @@
 
         function rejectTestimonial(id) {
             if (confirm('Are you sure you want to reject this testimonial?')) {
-                fetch('/admin/testimonials/reject', {
+                fetch('<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials/reject', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -178,7 +329,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('Testimonial rejected successfully!');
-                        window.location.href = '/admin/testimonials';
+                        window.location.href = '<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials';
                     } else {
                         alert('Error updating testimonial: ' + (data.message || 'Unknown error'));
                     }
@@ -193,7 +344,7 @@
                                 newStatus === 'rejected' ? 'reject' : null;
                 
                 if (endpoint) {
-                    fetch(`/admin/testimonials/${endpoint}`, {
+                    fetch(`<?php echo rtrim(BASE_URL, '/'); ?>/admin/testimonials/${endpoint}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

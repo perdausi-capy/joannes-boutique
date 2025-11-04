@@ -76,13 +76,14 @@
                 </div>
 
                 <?php if (isset($_SESSION['testimonial_message'])): ?>
+                    <script>window.__testimonialSubmitted = true;</script>
                     <div class="mb-4 p-4 rounded-lg <?php echo $_SESSION['testimonial_message']['type'] === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                         <?php echo htmlspecialchars($_SESSION['testimonial_message']['text']); ?>
                     </div>
                     <?php unset($_SESSION['testimonial_message']); ?>
                 <?php endif; ?>
 
-                <form method="post" action="/testimonials/submit">
+                <form method="post" action="<?php echo rtrim(BASE_URL, '/'); ?>/testimonials/submit">
                     <input type="hidden" name="csrf_token" value="<?php echo CSRF::generateToken(); ?>">
                     <div class="space-y-4">
                         <div>
@@ -145,6 +146,14 @@
                     });
                 });
             });
+
+            // Auto-open the modal if there is a session message (after submit)
+            if (window.__testimonialSubmitted) {
+                const modal = document.getElementById('reviewForm');
+                if (modal && modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                }
+            }
         });
     </script>
 </div>

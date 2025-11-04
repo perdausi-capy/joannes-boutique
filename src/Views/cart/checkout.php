@@ -6,7 +6,7 @@ $pageTitle = "Checkout | Joanne's";
     <?php if (!empty($error)): ?>
         <div class="mb-4 p-3 bg-red-100 text-red-700 rounded"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
-    <form method="post" action="/cart/checkout" class="bg-white p-6 rounded-lg shadow space-y-4">
+    <form method="post" action="cart/checkout" class="bg-white p-6 rounded-lg shadow space-y-4">
         <input type="hidden" name="csrf_token" value="<?php echo CSRF::generateToken(); ?>">
         <div>
             <label class="block text-sm font-medium text-gray-700">Shipping Address</label>
