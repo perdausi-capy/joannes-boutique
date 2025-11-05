@@ -1,5 +1,5 @@
 <?php
-// Admin Categories Management - Enhanced Design
+// Admin Categories Management - Refactored to match products.php structure
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -184,11 +184,6 @@
             animation: slideInDown 0.4s ease-out;
         }
         
-        .alert-error {
-            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-            animation: slideInDown 0.4s ease-out;
-        }
-        
         @keyframes slideInDown {
             from {
                 opacity: 0;
@@ -246,6 +241,13 @@
             </header>
 
             <main class="p-8">
+                <?php if ($message): ?>
+                    <div class="alert-success mb-6 p-4 text-white rounded-xl flex items-center gap-3 shadow-lg fade-in">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                        <span class="font-semibold"><?php echo $message; ?></span>
+                    </div>
+                <?php endif; ?>
+
                 <?php if (isset($_SESSION['success'])): ?>
                     <div class="alert-success mb-6 p-4 text-white rounded-xl flex items-center gap-3 shadow-lg fade-in">
                         <i class="fas fa-check-circle text-2xl"></i>
@@ -254,20 +256,108 @@
                 <?php endif; ?>
 
                 <?php if (isset($_SESSION['error'])): ?>
-                    <div class="alert-error mb-6 p-4 text-white rounded-xl flex items-center gap-3 shadow-lg fade-in">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 mb-6 p-4 text-white rounded-xl flex items-center gap-3 shadow-lg fade-in">
                         <i class="fas fa-exclamation-circle text-2xl"></i>
                         <span class="font-semibold"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></span>
                     </div>
                 <?php endif; ?>
 
-                <!-- Add Category Button -->
-                <div class="mb-6 fade-in">
-                    <a href="<?php echo $this->baseUrl; ?>/admin/categories/create" class="btn-gold-gradient px-6 py-3 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl inline-flex items-center gap-2">
-                        <span class="flex items-center justify-center gap-2">
-                            <i class="fas fa-plus"></i>
-                            Add New Category
-                        </span>
-                    </a>
+                <!-- Category Form -->
+                <div class="form-card bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-<?php echo $editCategory ? 'edit' : 'plus'; ?> text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-serif-elegant font-bold text-gray-900">
+                                <?php echo $editCategory ? 'Edit Category' : 'Add New Category'; ?>
+                            </h2>
+                            <p class="text-sm text-gray-600">Fill in the details below</p>
+                        </div>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" action="<?php echo $this->baseUrl; ?>/admin/categories?action=<?php echo $editCategory ? 'edit' : 'create'; ?>">
+                        <?php if ($editCategory): ?>
+                            <input type="hidden" name="id" value="<?php echo (int)$editCategory['id']; ?>">
+                        <?php endif; ?>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block mb-2 font-semibold text-gray-700">
+                                    <i class="fas fa-tag text-yellow-600 mr-1"></i>
+                                    Category Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="name" value="<?php echo htmlspecialchars($editCategory['name'] ?? ''); ?>" 
+                                       class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none" 
+                                       placeholder="Enter category name" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block mb-2 font-semibold text-gray-700">
+                                    <i class="fas fa-link text-yellow-600 mr-1"></i>
+                                    Slug
+                                </label>
+                                <input type="text" name="slug" value="<?php echo htmlspecialchars($editCategory['slug'] ?? ''); ?>" 
+                                       class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none" 
+                                       placeholder="auto-generated if empty">
+                                <p class="text-xs text-gray-500 mt-2">Leave empty to auto-generate from name</p>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label class="block mb-2 font-semibold text-gray-700">
+                                    <i class="fas fa-align-left text-yellow-600 mr-1"></i>
+                                    Description
+                                </label>
+                                <textarea name="description" rows="4" 
+                                          class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none"
+                                          placeholder="Enter category description"><?php echo htmlspecialchars($editCategory['description'] ?? ''); ?></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block mb-2 font-semibold text-gray-700">
+                                    <i class="fas fa-image text-yellow-600 mr-1"></i>
+                                    Category Image
+                                </label>
+                                <input type="file" name="image" accept="image/*" 
+                                       class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
+                                <p class="text-xs text-gray-500 mt-2">Upload category image (JPG, PNG, GIF, WEBP - Max 5MB)</p>
+                                <?php if (!empty($editCategory['image'])): ?>
+                                    <div class="mt-4">
+                                        <p class="text-sm font-semibold text-gray-700 mb-2">Current image:</p>
+                                        <div class="image-preview inline-block">
+                                            <img src="uploads/<?php echo htmlspecialchars($editCategory['image']); ?>" alt="Current Image" class="h-32 w-32 object-cover rounded-lg shadow-lg">
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="is_active" value="1" <?php echo (!isset($editCategory['is_active']) || $editCategory['is_active']) ? 'checked' : ''; ?>
+                                           class="rounded border-gray-300 text-green-600 focus:ring-green-500 w-5 h-5">
+                                    <span class="ml-3 text-gray-700 font-semibold">
+                                        <i class="fas fa-check-circle text-green-600 mr-1"></i>
+                                        Active
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 flex gap-4">
+                            <button type="submit" class="btn-gold-gradient px-8 py-4 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl">
+                                <span class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-save"></i>
+                                    <?php echo $editCategory ? 'Update Category' : 'Create Category'; ?>
+                                </span>
+                            </button>
+                            <?php if ($editCategory): ?>
+                                <a href="<?php echo $this->baseUrl; ?>/admin/categories" class="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-times"></i>
+                                    Cancel
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Categories Table -->
@@ -325,7 +415,7 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
-                                                <a href="<?php echo $this->baseUrl; ?>/admin/categories/edit/<?php echo (int)$category['id']; ?>" 
+                                                <a href="<?php echo $this->baseUrl; ?>/admin/categories?action=edit&id=<?php echo (int)$category['id']; ?>" 
                                                    class="action-btn px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold text-sm">
                                                     <i class="fas fa-edit mr-1"></i>Edit
                                                 </a>
@@ -359,7 +449,7 @@
     <script>
         function showDeleteModal(categoryId) {
             if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-                window.location.href = '<?php echo $this->baseUrl; ?>/admin/categories/delete/' + categoryId;
+                window.location.href = '<?php echo $this->baseUrl; ?>/admin/categories?action=delete&id=' + categoryId;
             }
         }
 

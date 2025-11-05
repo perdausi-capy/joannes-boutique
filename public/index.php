@@ -122,6 +122,10 @@ switch (true) {
         (new AdminController())->managePackages();
         break;
 
+    case $path === '/admin/categories':
+        (new AdminController())->manageCategory();
+        break;
+
     case $path === '/admin/orders':
         (new AdminController())->orders();
         break;

@@ -24,37 +24,54 @@ class CategoryController {
     }
 
     /**
-     * List all categories
+     * Main categories management page with form and list
      */
     public function index() {
-        $categories = $this->categoryModel->findAll();
+        $message = '';
+        $editCategory = null;
 
-        // Add product count to each category
-        foreach ($categories as &$category) {
-            $category['product_count'] = $this->categoryModel->getProductCount($category['id']);
+        // Handle form submissions
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_GET['action'] ?? '';
+            
+            if ($action === 'create') {
+                $message = $this->handleCreate();
+            } elseif ($action === 'edit') {
+                $message = $this->handleUpdate();
+            }
         }
 
-        // Include the view
-        include __DIR__ . '/../Views/admin/categories.php';
-    }
+        // Check if editing
+        if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+            $editCategory = $this->categoryModel->find((int)$_GET['id']);
+            if (!$editCategory) {
+                $_SESSION['error'] = 'Category not found';
+                header('Location: ' . $this->baseUrl . '/admin/categories');
+                exit;
+            }
+        }
 
-    /**
-     * Show create form
-     */
-    public function create() {
-        $category = null;
-        include __DIR__ . '/../Views/admin/category-form.php';
-    }
-
-    /**
-     * Store new category
-     */
-    public function store() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // Handle delete action
+        if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+            $message = $this->handleDelete((int)$_GET['id']);
             header('Location: ' . $this->baseUrl . '/admin/categories');
             exit;
         }
 
+        // Get all categories with product counts
+        $categories = $this->categoryModel->findAll();
+        foreach ($categories as &$category) {
+            $category['product_count'] = $this->categoryModel->getProductCount($category['id']);
+        }
+
+        // Include the view from correct location
+        require_once __DIR__ . '/../Views/admin/categories.php';
+    }
+
+    /**
+     * Handle category creation
+     */
+    private function handleCreate() {
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
         $description = trim($_POST['description'] ?? '');
@@ -62,9 +79,7 @@ class CategoryController {
 
         // Validate name
         if (empty($name)) {
-            $_SESSION['error'] = 'Category name is required';
-            header('Location: ' . $this->baseUrl . '/admin/categories/create');
-            exit;
+            return 'Category name is required';
         }
 
         // Auto-generate slug if empty
@@ -74,9 +89,7 @@ class CategoryController {
 
         // Check if slug already exists
         if ($this->categoryModel->findBySlug($slug)) {
-            $_SESSION['error'] = 'Category with this name already exists';
-            header('Location: ' . $this->baseUrl . '/admin/categories/create');
-            exit;
+            return 'Category with this name already exists';
         }
 
         // Handle image upload
@@ -84,9 +97,7 @@ class CategoryController {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $imagePath = $this->handleImageUpload($_FILES['image']);
             if (!$imagePath) {
-                $_SESSION['error'] = 'Failed to upload image. Please check file type and size.';
-                header('Location: ' . $this->baseUrl . '/admin/categories/create');
-                exit;
+                return 'Failed to upload image. Please check file type and size.';
             }
         }
 
@@ -101,44 +112,21 @@ class CategoryController {
 
         // Create category
         if ($this->categoryModel->create($data)) {
-            $_SESSION['success'] = 'Category created successfully';
+            return 'Category created successfully';
         } else {
-            $_SESSION['error'] = 'Failed to create category';
+            return 'Failed to create category';
         }
-
-        header('Location: ' . $this->baseUrl . '/admin/categories');
-        exit;
     }
 
     /**
-     * Show edit form
+     * Handle category update
      */
-    public function edit($id) {
+    private function handleUpdate() {
+        $id = (int)($_POST['id'] ?? 0);
         $category = $this->categoryModel->find($id);
-
+        
         if (!$category) {
-            $_SESSION['error'] = 'Category not found';
-            header('Location: ' . $this->baseUrl . '/admin/categories');
-            exit;
-        }
-
-        include __DIR__ . '/../Views/admin/category-form.php';
-    }
-
-    /**
-     * Update category
-     */
-    public function update($id) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . $this->baseUrl . '/admin/categories');
-            exit;
-        }
-
-        $category = $this->categoryModel->find($id);
-        if (!$category) {
-            $_SESSION['error'] = 'Category not found';
-            header('Location: ' . $this->baseUrl . '/admin/categories');
-            exit;
+            return 'Category not found';
         }
 
         $name = trim($_POST['name'] ?? '');
@@ -148,9 +136,7 @@ class CategoryController {
 
         // Validate name
         if (empty($name)) {
-            $_SESSION['error'] = 'Category name is required';
-            header('Location: ' . $this->baseUrl . '/admin/categories/edit/' . $id);
-            exit;
+            return 'Category name is required';
         }
 
         // Auto-generate slug if empty
@@ -161,9 +147,7 @@ class CategoryController {
         // Check if slug exists (excluding current category)
         $existingCategory = $this->categoryModel->findBySlug($slug);
         if ($existingCategory && $existingCategory['id'] != $id) {
-            $_SESSION['error'] = 'Another category with this name already exists';
-            header('Location: ' . $this->baseUrl . '/admin/categories/edit/' . $id);
-            exit;
+            return 'Another category with this name already exists';
         }
 
         // Handle image upload
@@ -190,33 +174,28 @@ class CategoryController {
 
         // Update category
         if ($this->categoryModel->update($id, $data)) {
-            $_SESSION['success'] = 'Category updated successfully';
+            return 'Category updated successfully';
         } else {
-            $_SESSION['error'] = 'Failed to update category';
+            return 'Failed to update category';
         }
-
-        header('Location: ' . $this->baseUrl . '/admin/categories');
-        exit;
     }
 
     /**
-     * Delete category
+     * Handle category deletion
      */
-    public function delete($id) {
+    private function handleDelete($id) {
         $category = $this->categoryModel->find($id);
 
         if (!$category) {
             $_SESSION['error'] = 'Category not found';
-            header('Location: ' . $this->baseUrl . '/admin/categories');
-            exit;
+            return '';
         }
 
         // Check if category has products
         $productCount = $this->categoryModel->getProductCount($id);
         if ($productCount > 0) {
             $_SESSION['error'] = "Cannot delete category with {$productCount} product(s). Please reassign or delete products first.";
-            header('Location: ' . $this->baseUrl . '/admin/categories');
-            exit;
+            return '';
         }
 
         // Delete image file
@@ -230,9 +209,8 @@ class CategoryController {
         } else {
             $_SESSION['error'] = 'Failed to delete category';
         }
-
-        header('Location: ' . $this->baseUrl . '/admin/categories');
-        exit;
+        
+        return '';
     }
 
     /**
