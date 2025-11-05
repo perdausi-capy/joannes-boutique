@@ -550,6 +550,60 @@ class BookingOrder extends BaseModel
     }
     
     /**
+     * Check if a product is currently reserved (rented)
+     * Returns array with 'is_reserved' (bool) and 'next_available_date' (string|null)
+     * A product is considered reserved if:
+     * - It's currently being rented (current date is between rental_start and rental_end)
+     * - It has an upcoming reservation (rental_start is in the future, rental_end hasn't passed)
+     * 
+     * For multiple reservations, returns the LAST reservation's end date to show when
+     * the product will truly be available again.
+     */
+    public function getProductReservationStatus($productId) {
+        $currentDate = date('Y-m-d');
+        
+        // Find ALL confirmed reservations (active or upcoming) where rental_end hasn't passed
+        // Order by rental_end DESC to get the LAST reservation (latest end date)
+        $sql = "SELECT rental_end, rental_start, payment_status
+                FROM {$this->table}
+                WHERE order_type = 'rental'
+                  AND item_id = ?
+                  AND rental_start IS NOT NULL
+                  AND rental_end IS NOT NULL
+                  AND rental_end >= ?
+                  AND (
+                      payment_status IN ('pending', 'paid', 'verified')
+                      OR payment_status IS NULL
+                      OR payment_status = ''
+                  )
+                ORDER BY rental_end DESC
+                LIMIT 1";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$productId, $currentDate]);
+        $reservation = $stmt->fetch();
+        
+        if ($reservation) {
+            // Product has at least one reservation (active or upcoming)
+            // Return next available date based on the LAST reservation's rental_end + 1 day
+            $rentalEnd = new \DateTime($reservation['rental_end']);
+            $rentalEnd->modify('+1 day');
+            return [
+                'is_reserved' => true,
+                'next_available_date' => $rentalEnd->format('Y-m-d'),
+                'rental_end' => $reservation['rental_end']
+            ];
+        }
+        
+        // No active or upcoming reservations - product is available
+        return [
+            'is_reserved' => false,
+            'next_available_date' => null,
+            'rental_end' => null
+        ];
+    }
+    
+    /**
      * Mark penalty as paid and update payment status
      * Called after successful payment that includes penalty
      * 

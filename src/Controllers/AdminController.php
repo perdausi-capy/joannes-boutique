@@ -313,6 +313,146 @@ class AdminController {
         $this->render('admin/packages', ['message' => $message, 'packages' => $packages]);
     }
 
+    public function manageCategories() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/Category.php';
+        $categoryModel = new Category();
+        $message = null;
+        $editCategory = null;
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? $_GET['action'] ?? 'create';
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
+            
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $is_active = isset($_POST['is_active']) ? 1 : 0;
+            
+            // Auto-generate slug if empty
+            if (empty($slug) && !empty($name)) {
+                $slug = strtolower(trim($name));
+                $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
+                $slug = preg_replace('/-+/', '-', $slug);
+                $slug = trim($slug, '-');
+            }
+            
+            // Validate slug uniqueness (only for create, or for edit if slug changed)
+            if (!empty($slug)) {
+                $existing = $categoryModel->findBySlug($slug);
+                if ($existing) {
+                    if ($action === 'create' || ($action === 'edit' && $existing['id'] != $id)) {
+                        $message = '<span class="text-red-600">Category with this slug already exists!</span>';
+                        // If editing, keep the editCategory set
+                        if ($action === 'edit' && $id) {
+                            $editCategory = $categoryModel->findById($id);
+                            if ($editCategory) {
+                                // Update with form values for display
+                                $editCategory['name'] = $name;
+                                $editCategory['slug'] = $slug;
+                                $editCategory['description'] = $description;
+                                $editCategory['is_active'] = $is_active;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // If there's an error message, skip processing
+            if (!$message) {
+                // Handle image upload
+                $imagePath = null;
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                    $uploadDir = UPLOAD_PATH . 'categories/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                    $imageFileName = 'cat_' . uniqid() . '.' . $ext;
+                    move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageFileName);
+                    $imagePath = 'categories/' . $imageFileName;
+                }
+                
+                if ($action === 'delete' && $id) {
+                    // Check if category has products
+                    $productCount = $categoryModel->getProductCount($id);
+                    if ($productCount > 0) {
+                        $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s). Please reassign or delete products first.</span>';
+                    } else {
+                        $category = $categoryModel->findById($id);
+                        if ($category && $category['image'] && file_exists(UPLOAD_PATH . $category['image'])) {
+                            unlink(UPLOAD_PATH . $category['image']);
+                        }
+                        $categoryModel->delete($id);
+                        $message = '<span class="text-green-600">✓ Category deleted successfully!</span>';
+                    }
+                } elseif ($action === 'edit' && $id) {
+                    $data = [
+                        'name' => $name,
+                        'slug' => $slug,
+                        'description' => $description,
+                        'is_active' => $is_active
+                    ];
+                    if ($imagePath) {
+                        // Delete old image if exists
+                        $oldCategory = $categoryModel->findById($id);
+                        if ($oldCategory && $oldCategory['image'] && file_exists(UPLOAD_PATH . $oldCategory['image'])) {
+                            unlink(UPLOAD_PATH . $oldCategory['image']);
+                        }
+                        $data['image'] = $imagePath;
+                    }
+                    $categoryModel->update($id, $data);
+                    $message = '<span class="text-green-600">✓ Category updated successfully!</span>';
+                } else {
+                    // Create
+                    $data = [
+                        'name' => $name,
+                        'slug' => $slug,
+                        'description' => $description,
+                        'image' => $imagePath,
+                        'is_active' => $is_active
+                    ];
+                    $categoryModel->create($data);
+                    $message = '<span class="text-green-600">✓ Category created successfully!</span>';
+                }
+            }
+        }
+        
+        // Check if editing
+        if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+            $editCategory = $categoryModel->findById((int)$_GET['id']);
+        }
+        
+        // Handle delete action from GET
+        if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+            $id = (int)$_GET['id'];
+            $productCount = $categoryModel->getProductCount($id);
+            if ($productCount > 0) {
+                $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s). Please reassign or delete products first.</span>';
+            } else {
+                $category = $categoryModel->findById($id);
+                if ($category && $category['image'] && file_exists(UPLOAD_PATH . $category['image'])) {
+                    unlink(UPLOAD_PATH . $category['image']);
+                }
+                $categoryModel->delete($id);
+                header('Location: ' . BASE_URL . 'admin/categories');
+                exit;
+            }
+        }
+        
+        // Get all categories with product counts
+        $categories = $categoryModel->findAll();
+        foreach ($categories as &$category) {
+            $category['product_count'] = $categoryModel->getProductCount($category['id']);
+        }
+        
+        $this->render('admin/categories', [
+            'categories' => $categories, 
+            'message' => $message, 
+            'editCategory' => $editCategory
+        ]);
+    }
+
     public function approveTestimonial() {
         Auth::requireAdmin();
         

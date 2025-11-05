@@ -123,7 +123,7 @@ switch (true) {
         break;
 
     case $path === '/admin/categories':
-        (new AdminController())->manageCategory();
+        (new AdminController())->manageCategories();
         break;
 
     case $path === '/admin/orders':
@@ -220,38 +220,24 @@ switch (true) {
         require __DIR__ . '/../api/check_availability.php';
         break;
 
-    // Category management routes
-    case $path === '/admin/categories':
-        (new CategoryController())->index();
-        break;
-    
-    case $path === '/admin/categories/create':
-        (new CategoryController())->create();
-        break;
-    
-    case $path === '/admin/categories/store' && $_SERVER['REQUEST_METHOD'] === 'POST':
-        (new CategoryController())->store();
-        break;
-    
-    case preg_match('#^/admin/categories/edit/(\d+)$#', $path, $m):
-        (new CategoryController())->edit((int)$m[1]);
-        break;
-    
-    case preg_match('#^/admin/categories/update/(\d+)$#', $path, $m) && $_SERVER['REQUEST_METHOD'] === 'POST':
-        (new CategoryController())->update((int)$m[1]);
-        break;
-    
-    case preg_match('#^/admin/categories/delete/(\d+)$#', $path, $m):
-        (new CategoryController())->delete((int)$m[1]);
-        break;
-    
+    // Category toggle route (for AJAX)
     case preg_match('#^/admin/categories/toggle/(\d+)$#', $path, $m) && $_SERVER['REQUEST_METHOD'] === 'POST':
-        (new CategoryController())->toggle((int)$m[1]);
-        break;
-
-    case $path === '/admin/categories':
-        (new CategoryController())->index();
-        break;
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../src/Models/Category.php';
+        $categoryModel = new Category();
+        header('Content-Type: application/json');
+        $category = $categoryModel->findById((int)$m[1]);
+        if (!$category) {
+            echo json_encode(['success' => false, 'message' => 'Category not found']);
+            exit;
+        }
+        $newStatus = $category['is_active'] ? 0 : 1;
+        if ($categoryModel->update((int)$m[1], ['is_active' => $newStatus])) {
+            echo json_encode(['success' => true, 'status' => $newStatus]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+        }
+        exit;
 
     default:
         http_response_code(404);

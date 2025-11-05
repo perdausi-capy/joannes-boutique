@@ -252,6 +252,15 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                             <?php echo htmlspecialchars($product['name']); ?>
                         </h1>
                         
+                        <?php if (!empty($reservationStatus) && $reservationStatus['is_reserved']): ?>
+                            <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <p class="text-amber-700 italic flex items-center gap-2">
+                                    <span>⏰</span>
+                                    <span>This product will be available again on: <strong><?php echo date('F j, Y', strtotime($reservationStatus['next_available_date'])); ?></strong></span>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                        
                         <div class="flex items-center gap-4 mb-6">
                             <div class="text-4xl font-bold text-yellow-600">
                                 ₱<?php echo number_format($product['price'], 2); ?>
@@ -473,7 +482,7 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                 <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200">
                     <label class="block text-xs text-yellow-700 font-semibold mb-1 uppercase tracking-wide">Selected Item</label>
                     <div class="font-bold text-lg font-serif-elegant text-gray-900" id="rentalItemName"></div>
-                    <div class="text-yellow-600 font-semibold mt-1">₱<span id="rentalItemPrice"></span> per day</div>
+                    <div class="text-yellow-600 font-semibold mt-1">₱<span id="rentalItemPrice"></span></div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">

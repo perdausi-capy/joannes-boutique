@@ -36,6 +36,16 @@ class ProductController {
         $categories = $this->categoryModel->findAll();
         $totalPages = ceil($totalProducts / $limit);
         
+        // Get reservation status for each product
+        require_once __DIR__ . '/../Models/BookingOrder.php';
+        $bookingOrderModel = new BookingOrder();
+        foreach ($products as &$product) {
+            $reservationStatus = $bookingOrderModel->getProductReservationStatus($product['id']);
+            $product['is_reserved'] = $reservationStatus['is_reserved'];
+            $product['next_available_date'] = $reservationStatus['next_available_date'];
+            $product['rental_end'] = $reservationStatus['rental_end'];
+        }
+        
         // Check if this is an AJAX request
         if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
             header('Content-Type: application/json');
@@ -89,6 +99,9 @@ class ProductController {
         require_once __DIR__ . '/../Utils/Auth.php';
         
         $bookingOrderModel = new BookingOrder();
+        
+        // Get reservation status for this product
+        $reservationStatus = $bookingOrderModel->getProductReservationStatus($id);
         $penaltyInfo = [
             'has_overdue' => false,
             'overdue_rentals' => [],
@@ -156,7 +169,8 @@ class ProductController {
             'relatedProducts' => $relatedProducts,
             'penaltyInfo' => $penaltyInfo,
             'currentOrder' => $currentOrder,
-            'orderPenaltyInfo' => $orderPenaltyInfo
+            'orderPenaltyInfo' => $orderPenaltyInfo,
+            'reservationStatus' => $reservationStatus
         ]);
     }
     

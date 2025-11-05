@@ -413,11 +413,19 @@ $pageTitle = "Gallery | Joanne's";
                                         </div>
                                     <?php endif; ?>
                                     
-                                    <?php if ($product['is_featured']): ?>
-                                        <div class="absolute top-4 right-4 featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
-                                            ⭐ Featured
-                                        </div>
-                                    <?php endif; ?>
+                                    <!-- Badges Container -->
+                                    <div class="absolute top-2 right-2 flex flex-col gap-2">
+                                        <?php if ($product['is_reserved'] ?? false): ?>
+                                            <div class="reserved-badge px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg" style="background-color: #EF4444;">
+                                                Reserved
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($product['is_featured'] ?? false): ?>
+                                            <div class="featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
+                                                ⭐ Featured
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                     
                                     <div class="product-overlay">
                                         <a href="products/show/<?php echo (int)$product['id']; ?>" 
@@ -792,11 +800,19 @@ function renderProducts(products, pagination) {
                     </div>`
                 }
                 
-                ${product.is_featured ? 
-                    `<div class="absolute top-4 right-4 featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
-                        ⭐ Featured
-                    </div>` : ''
-                }
+                <!-- Badges Container -->
+                <div class="absolute top-2 right-2 flex flex-col gap-2">
+                    ${product.is_reserved ? 
+                        `<div class="reserved-badge px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg" style="background-color: #EF4444;">
+                            Reserved
+                        </div>` : ''
+                    }
+                    ${product.is_featured ? 
+                        `<div class="featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
+                            ⭐ Featured
+                        </div>` : ''
+                    }
+                </div>
                 
                 <div class="product-overlay">
                     <a href="products/show/${product.id}" 

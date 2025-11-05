@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PHP Apache Web Server
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joannes-boutique-web
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./public/uploads:/var/www/html/public/uploads
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-joannes_boutique}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-rootpassword}
+    depends_on:
+      - db
+    networks:
+      - joannes-network
+    restart: unless-stopped
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: joannes-boutique-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME:-joannes_boutique}
+      - MYSQL_USER=${DB_USER:-root}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/joannes_boutique.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - joannes-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+
+  # phpMyAdmin (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: joannes-boutique-phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=${DB_PASSWORD:-rootpassword}
+    depends_on:
+      - db
+    networks:
+      - joannes-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  joannes-network:
+    driver: bridge
+
