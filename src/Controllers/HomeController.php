@@ -404,9 +404,9 @@ class HomeController {
                 <h2 class="font-serif-elegant text-4xl md:text-5xl font-bold mb-6">Ready to Look Stunning?</h2>
                 <p class="text-xl text-gray-300 mb-8">Book your consultation today and let us create something extraordinary for you.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="booking" class="btn-gold-new px-10 py-5 rounded-full text-white font-semibold text-lg hover:shadow-2xl">
+                    <!-- <a href="booking" class="btn-gold-new px-10 py-5 rounded-full text-white font-semibold text-lg hover:shadow-2xl">
                         <span>Schedule Appointment</span>
-                    </a>
+                    </a> -->
                     <a href="contact" class="px-10 py-5 rounded-full text-white font-semibold border-2 border-white/30 hover:bg-white/10 transition-all text-lg">
                         Contact Us
                     </a>

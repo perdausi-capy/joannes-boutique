@@ -115,15 +115,114 @@ $pageTitle = "Gallery | Joanne's";
     }
     
     .featured-badge {
-        background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-        animation: pulse-badge 2s ease-in-out infinite;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 
+            0 10px 25px rgba(255, 165, 0, 0.5),
+            0 5px 15px rgba(255, 215, 0, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.6),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+        animation: golden-pulse 3s ease-in-out infinite;
+        backdrop-filter: blur(4px);
+    }
+
+    .featured-badge::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to right,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        );
+        transform: rotate(45deg);
+        animation: shine 3s infinite;
+    }
+
+    .featured-badge::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.1) 100%
+        );
+        border-radius: inherit;
+        pointer-events: none;
     }
     
-    @keyframes pulse-badge {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
-        50% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
+    @keyframes golden-pulse {
+        0%, 100% { 
+            box-shadow: 
+                0 10px 25px rgba(255, 165, 0, 0.5),
+                0 5px 15px rgba(255, 215, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.6),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+        50% { 
+            box-shadow: 
+                0 15px 35px rgba(255, 165, 0, 0.6),
+                0 8px 20px rgba(255, 215, 0, 0.5),
+                inset 0 2px 4px rgba(255, 255, 255, 0.7),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
     }
-    
+
+    @keyframes shine {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(200%) rotate(45deg); }
+    }
+
+    .reserved-badge {
+        background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 
+            0 8px 20px rgba(220, 38, 38, 0.4),
+            0 4px 12px rgba(153, 27, 27, 0.3),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(4px);
+    }
+
+    .reserved-badge::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.2) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.15) 100%
+        );
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .badge-icon {
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        animation: icon-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes icon-glow {
+        0%, 100% { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
+        50% { filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.5)); }
+    }
+
+    .badge-text {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
     .search-bar-enhanced {
         position: relative;
         display: none;

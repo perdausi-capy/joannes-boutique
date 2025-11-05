@@ -217,6 +217,38 @@ class AdminController {
         $this->render('admin/users', ['users' => $users]);
     }
 
+    public function contacts() {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/ContactMessage.php';
+        $contactModel = new ContactMessage();
+        $messages = $contactModel->findAll();
+        $this->render('admin/contacts', ['messages' => $messages]);
+    }
+
+    public function viewContact(int $id) {
+        Auth::requireAdmin();
+        require_once __DIR__ . '/../Models/ContactMessage.php';
+        $contactModel = new ContactMessage();
+        $message = $contactModel->findById($id);
+        if (!$message) { http_response_code(404); echo 'Message not found'; return; }
+        $this->render('admin/contact-view', ['message' => $message]);
+    }
+
+    public function deleteContact() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['success'=>false]); return; }
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if (!$id) { echo json_encode(['success'=>false,'message'=>'Invalid ID']); return; }
+        require_once __DIR__ . '/../Models/ContactMessage.php';
+        $contactModel = new ContactMessage();
+        try {
+            $ok = $contactModel->delete($id);
+            echo json_encode(['success'=>(bool)$ok]);
+        } catch (Exception $e) {
+            echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
+        }
+    }
+
     public function viewUser(int $id) {
         Auth::requireAdmin();
         require_once __DIR__ . '/../Models/User.php';

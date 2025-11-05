@@ -286,13 +286,13 @@ $pageTitle = "Contact Us | Joanne's";
                 </div>
 
                 <!-- Quick Action Card -->
-                <div class="rounded-3xl shadow-lg bg-gradient-to-br from-yellow-500 to-yellow-400 p-10 text-white">
+                <!-- <div class="rounded-3xl shadow-lg bg-gradient-to-br from-yellow-500 to-yellow-400 p-10 text-white">
                     <h3 class="text-2xl font-semibold mb-4">Need a Consultation?</h3>
                     <p class="mb-6 text-lg">Schedule a personal fitting or discuss your custom gown design.</p>
                     <a href="booking" class="inline-block bg-white text-yellow-600 font-semibold px-6 py-3 rounded-xl hover:bg-gray-100 transition">
                         Book a Consultation
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

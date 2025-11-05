@@ -182,6 +182,19 @@ switch (true) {
         (new AdminController())->viewTestimonial((int)$m[1]);
         break;
 
+    // Admin contacts routes
+    case $path === '/admin/contacts':
+        (new AdminController())->contacts();
+        break;
+
+    case preg_match('#^/admin/contacts/view/(\d+)$#', $path, $m):
+        (new AdminController())->viewContact((int)$m[1]);
+        break;
+
+    case $path === '/admin/contacts/delete' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->deleteContact();
+        break;
+
     // Admin booking routes
     case $path === '/admin/bookings':
         (new AdminController())->manageBookings();
@@ -193,6 +206,10 @@ switch (true) {
     
     case preg_match('#^/admin/bookings/verify/(\d+)$#', $path, $m):
         (new AdminController())->verifyBooking((int)$m[1]);
+        break;
+
+    case $path === '/admin/resolve-penalty' && $_SERVER['REQUEST_METHOD'] === 'POST':
+        (new AdminController())->resolvePenalty();
         break;
 
     // Payment routes

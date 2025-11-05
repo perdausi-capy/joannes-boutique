@@ -50,6 +50,12 @@ $navLinks = [
         'href' => 'admin/packages',
         'page' => 'packages'
     ]
+    // [
+    //     'icon' => 'envelope',
+    //     'label' => 'Contacts',
+    //     'href' => 'admin/contacts',
+    //     'page' => 'contacts'
+    // ]
 ];
 
 // Function to check if link is active
