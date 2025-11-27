@@ -133,9 +133,9 @@
 									</div>
 									
 									<?php if ($isOverdue && !$isPenaltyPaid && $finalPenalty > 0): ?>
-										<a href="contact" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition">
+										<!-- <a href="contact" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition">
 											Contact Us
-										</a>
+										</a> -->
 									<?php endif; ?>
 								</div>
 							</div>

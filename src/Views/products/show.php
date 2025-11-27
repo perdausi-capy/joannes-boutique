@@ -1,5 +1,11 @@
 <?php
 $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
+$user = $_SESSION['user'] ?? [];
+
+// At the top of the file
+$userName = $_SESSION['user_name'] ?? '';
+$userEmail = $_SESSION['user_email'] ?? '';
+$userPhone = $_SESSION['user_phone'] ?? '';
 ?>
 
 <style>
@@ -255,8 +261,8 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                         <?php if (!empty($reservationStatus) && $reservationStatus['is_reserved']): ?>
                             <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                                 <p class="text-amber-700 italic flex items-center gap-2">
-                                    <span>⏰</span>
-                                    <span>This product will be available again on: <strong><?php echo date('F j, Y', strtotime($reservationStatus['next_available_date'])); ?></strong></span>
+                                    <span class="text-2xl">⏰</span>
+                                    <span class="text-red-800 font-semibold text-sm">This product will be available again on: <strong><?php echo date('F j, Y', strtotime($reservationStatus['next_available_date'])); ?></strong></span>
                                 </p>
                             </div>
                         <?php endif; ?>
@@ -484,6 +490,9 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                     <div class="font-bold text-lg font-serif-elegant text-gray-900" id="rentalItemName"></div>
                     <div class="text-yellow-600 font-semibold mt-1">₱<span id="rentalItemPrice"></span></div>
                 </div>
+
+                <!-- Availability error in modal -->
+                <div id="availability-error-modal" style="display: none;"></div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -522,23 +531,25 @@ $pageTitle = ($product['name'] ?? "Product") . " | Joanne's";
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
                             <input type="text" name="contact_name" required 
-                                   class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
+                                value="<?php echo htmlspecialchars($userName); ?>"
+                                class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
                             <input type="email" name="contact_email" required 
-                                   class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
+                                value="<?php echo htmlspecialchars($userEmail); ?>"
+                                class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
-                            <input type="tel" name="contact_phone" required 
-                                   class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
+                            <input type="tel" maxlength="11" name="contact_phone" required 
+                                value="<?php echo htmlspecialchars($userPhone); ?>"
+                                class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
                         </div>
                     </div>
                 </div>
                 
-                <!-- Availability error in modal -->
-                <div id="availability-error-modal" style="display: none;"></div>
+                
                 
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeRentalModal()" 

@@ -348,19 +348,21 @@ class AdminController {
     public function manageCategories() {
         Auth::requireAdmin();
         require_once __DIR__ . '/../Models/Category.php';
+        require_once __DIR__ . '/../Models/Product.php'; // ✅ add this
         $categoryModel = new Category();
+        $productModel = new Product(); // ✅ create product model
+    
         $message = null;
         $editCategory = null;
-        
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? $_GET['action'] ?? 'create';
             $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
-            
             $name = trim($_POST['name'] ?? '');
             $slug = trim($_POST['slug'] ?? '');
             $description = trim($_POST['description'] ?? '');
             $is_active = isset($_POST['is_active']) ? 1 : 0;
-            
+    
             // Auto-generate slug if empty
             if (empty($slug) && !empty($name)) {
                 $slug = strtolower(trim($name));
@@ -368,18 +370,16 @@ class AdminController {
                 $slug = preg_replace('/-+/', '-', $slug);
                 $slug = trim($slug, '-');
             }
-            
-            // Validate slug uniqueness (only for create, or for edit if slug changed)
+    
+            // Validate slug uniqueness
             if (!empty($slug)) {
                 $existing = $categoryModel->findBySlug($slug);
                 if ($existing) {
                     if ($action === 'create' || ($action === 'edit' && $existing['id'] != $id)) {
                         $message = '<span class="text-red-600">Category with this slug already exists!</span>';
-                        // If editing, keep the editCategory set
                         if ($action === 'edit' && $id) {
                             $editCategory = $categoryModel->findById($id);
                             if ($editCategory) {
-                                // Update with form values for display
                                 $editCategory['name'] = $name;
                                 $editCategory['slug'] = $slug;
                                 $editCategory['description'] = $description;
@@ -389,27 +389,24 @@ class AdminController {
                     }
                 }
             }
-            
-            // If there's an error message, skip processing
+    
+            // Skip if error
             if (!$message) {
                 // Handle image upload
                 $imagePath = null;
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $uploadDir = UPLOAD_PATH . 'categories/';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
+                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $imageFileName = 'cat_' . uniqid() . '.' . $ext;
                     move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageFileName);
                     $imagePath = 'categories/' . $imageFileName;
                 }
-                
+    
                 if ($action === 'delete' && $id) {
-                    // Check if category has products
                     $productCount = $categoryModel->getProductCount($id);
                     if ($productCount > 0) {
-                        $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s). Please reassign or delete products first.</span>';
+                        $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s).</span>';
                     } else {
                         $category = $categoryModel->findById($id);
                         if ($category && $category['image'] && file_exists(UPLOAD_PATH . $category['image'])) {
@@ -426,7 +423,6 @@ class AdminController {
                         'is_active' => $is_active
                     ];
                     if ($imagePath) {
-                        // Delete old image if exists
                         $oldCategory = $categoryModel->findById($id);
                         if ($oldCategory && $oldCategory['image'] && file_exists(UPLOAD_PATH . $oldCategory['image'])) {
                             unlink(UPLOAD_PATH . $oldCategory['image']);
@@ -436,7 +432,6 @@ class AdminController {
                     $categoryModel->update($id, $data);
                     $message = '<span class="text-green-600">✓ Category updated successfully!</span>';
                 } else {
-                    // Create
                     $data = [
                         'name' => $name,
                         'slug' => $slug,
@@ -449,18 +444,16 @@ class AdminController {
                 }
             }
         }
-        
-        // Check if editing
+    
         if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
             $editCategory = $categoryModel->findById((int)$_GET['id']);
         }
-        
-        // Handle delete action from GET
+    
         if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
             $id = (int)$_GET['id'];
             $productCount = $categoryModel->getProductCount($id);
             if ($productCount > 0) {
-                $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s). Please reassign or delete products first.</span>';
+                $message = '<span class="text-red-600">Cannot delete category with ' . $productCount . ' product(s).</span>';
             } else {
                 $category = $categoryModel->findById($id);
                 if ($category && $category['image'] && file_exists(UPLOAD_PATH . $category['image'])) {
@@ -471,19 +464,21 @@ class AdminController {
                 exit;
             }
         }
-        
-        // Get all categories with product counts
+    
         $categories = $categoryModel->findAll();
         foreach ($categories as &$category) {
             $category['product_count'] = $categoryModel->getProductCount($category['id']);
         }
-        
+    
+        // ✅ pass $productModel to the view
         $this->render('admin/categories', [
-            'categories' => $categories, 
-            'message' => $message, 
+            'categories' => $categories,
+            'productModel' => $productModel,
+            'message' => $message,
             'editCategory' => $editCategory
         ]);
     }
+    
 
     public function approveTestimonial() {
         Auth::requireAdmin();

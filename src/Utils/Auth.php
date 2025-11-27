@@ -5,6 +5,7 @@ class Auth {
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
+        $_SESSION['user_phone'] = $user['phone'] ?? '';
         session_regenerate_id(true);
     }
     

@@ -37,6 +37,9 @@
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     .package-card-enhanced::before {
@@ -65,6 +68,7 @@
         height: 280px;
         overflow: hidden;
         position: relative;
+        flex-shrink: 0;
     }
     
     .package-card-enhanced .package-image img {
@@ -76,6 +80,25 @@
     
     .package-card-enhanced:hover .package-image img {
         transform: scale(1.1);
+    }
+    
+    .package-card-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .package-card-body {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .package-card-footer {
+        margin-top: auto;
+        padding-top: 1rem;
     }
     
     .package-badge {
@@ -90,6 +113,22 @@
         font-size: 0.875rem;
         z-index: 2;
         box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    }
+    
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .btn-gold-elegant {
@@ -266,69 +305,73 @@
                             <?php endif; ?>
                         </div>
                         
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <h2 class="font-serif-elegant text-2xl font-bold text-gray-900 mb-2">
-                                    <?php echo htmlspecialchars($p['package_name']); ?>
-                                </h2>
+                        <div class="package-card-content">
+                            <div class="package-card-body">
+                                <div>
+                                    <h2 class="font-serif-elegant text-2xl font-bold text-gray-900 mb-2">
+                                        <?php echo htmlspecialchars($p['package_name']); ?>
+                                    </h2>
+                                    
+                                    <?php if (!empty($p['hotel_name'])): ?>
+                                        <div class="flex items-center gap-2 text-gray-600 mb-1">
+                                            <i class="fas fa-hotel text-yellow-600 flex-shrink-0"></i>
+                                            <span class="font-medium text-truncate-2"><?php echo htmlspecialchars($p['hotel_name']); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($p['hotel_address'])): ?>
+                                        <div class="flex items-center gap-2 text-gray-500 text-sm">
+                                            <i class="fas fa-map-marker-alt text-yellow-600 flex-shrink-0"></i>
+                                            <span class="text-truncate-2"><?php echo htmlspecialchars($p['hotel_address']); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                                 
-                                <?php if (!empty($p['hotel_name'])): ?>
-                                    <div class="flex items-center gap-2 text-gray-600 mb-1">
-                                        <i class="fas fa-hotel text-yellow-600"></i>
-                                        <span class="font-medium"><?php echo htmlspecialchars($p['hotel_name']); ?></span>
-                                    </div>
+                                <?php if (!empty($p['hotel_description'])): ?>
+                                    <p class="text-gray-600 text-sm leading-relaxed text-truncate-3">
+                                        <?php echo htmlspecialchars($p['hotel_description']); ?>
+                                    </p>
                                 <?php endif; ?>
                                 
-                                <?php if (!empty($p['hotel_address'])): ?>
-                                    <div class="flex items-center gap-2 text-gray-500 text-sm">
-                                        <i class="fas fa-map-marker-alt text-yellow-600"></i>
-                                        <span><?php echo htmlspecialchars($p['hotel_address']); ?></span>
+                                <?php $inc = json_decode($p['inclusions'] ?? '{}', true) ?: []; ?>
+                                <?php if (!empty($inc)): ?>
+                                    <div class="space-y-3 pt-2 border-t border-gray-100">
+                                        <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                                            <i class="fas fa-check-circle text-yellow-600"></i>
+                                            Package Includes:
+                                        </h3>
+                                        <div class="space-y-2">
+                                            <?php $shown = 0; foreach ($inc as $label => $items): if ($shown >= 2) break; if (empty($items)) continue; $shown++; ?>
+                                                <div>
+                                                    <p class="text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
+                                                        <?php echo htmlspecialchars($label); ?>
+                                                    </p>
+                                                    <div class="flex flex-wrap gap-1">
+                                                        <?php $i = 0; foreach ($items as $it): if ($i >= 3) break; $i++; ?>
+                                                            <span class="inclusion-badge">
+                                                                <i class="fas fa-check text-xs"></i>
+                                                                <?php echo htmlspecialchars($it); ?>
+                                                            </span>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
                             </div>
                             
-                            <?php if (!empty($p['hotel_description'])): ?>
-                                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                                    <?php echo htmlspecialchars($p['hotel_description']); ?>
-                                </p>
-                            <?php endif; ?>
-                            
-                            <?php $inc = json_decode($p['inclusions'] ?? '{}', true) ?: []; ?>
-                            <?php if (!empty($inc)): ?>
-                                <div class="space-y-3 pt-2 border-t border-gray-100">
-                                    <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                        <i class="fas fa-check-circle text-yellow-600"></i>
-                                        Package Includes:
-                                    </h3>
-                                    <div class="space-y-2">
-                                        <?php $shown = 0; foreach ($inc as $label => $items): if ($shown >= 2) break; if (empty($items)) continue; $shown++; ?>
-                                            <div>
-                                                <p class="text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
-                                                    <?php echo htmlspecialchars($label); ?>
-                                                </p>
-                                                <div class="flex flex-wrap gap-1">
-                                                    <?php $i = 0; foreach ($items as $it): if ($i >= 3) break; $i++; ?>
-                                                        <span class="inclusion-badge">
-                                                            <i class="fas fa-check text-xs"></i>
-                                                            <?php echo htmlspecialchars($it); ?>
-                                                        </span>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
+                            <div class="package-card-footer">
+                                <div class="flex gap-2">
+                                    <a href="packages/view/<?php echo (int)$p['package_id']; ?>" 
+                                       class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
+                                        <span>View Details</span>
+                                    </a>
+                                    <button onclick="openBookingModal(<?php echo (int)$p['package_id']; ?>, '<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>', <?php echo $p['price'] ?? 0; ?>)" 
+                                            class="flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg">
+                                        <span>Book Now</span>
+                                    </button>
                                 </div>
-                            <?php endif; ?>
-                            
-                            <div class="flex gap-2 pt-4">
-                                <a href="packages/view/<?php echo (int)$p['package_id']; ?>" 
-                                   class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
-                                    <span>View Details</span>
-                                </a>
-                                <button onclick="openBookingModal(<?php echo (int)$p['package_id']; ?>, '<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>', <?php echo $p['price'] ?? 0; ?>)" 
-                                        class="flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg">
-                                    <span>Book Now</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -437,7 +480,7 @@
                                     <i class="fas fa-phone text-yellow-600 mr-1"></i>
                                     Phone Number *
                                 </label>
-                                <input type="tel" id="contact_phone" name="contact_phone" x-model="form.contact_phone" required
+                                <input type="tel" id="contact_phone" maxlength="11" name="contact_phone" x-model="form.contact_phone" required
                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors">
                             </div>
                         </div>
@@ -466,7 +509,7 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <script>
 // Scroll reveal animation

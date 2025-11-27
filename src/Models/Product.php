@@ -1,6 +1,24 @@
 <?php
+// src/Models/Product.php
+
 class Product extends BaseModel {
     protected $table = 'products';
+    
+    /**
+     * Get products by category ID
+     */
+    public function getProductsByCategory($categoryId) {
+        $sql = "SELECT p.*, c.name as category_name 
+                FROM {$this->table} p 
+                LEFT JOIN categories c ON p.category_id = c.id 
+                WHERE p.category_id = :category_id 
+                ORDER BY p.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     public function findByCategory($categoryId, $limit = null) {
         $sql = "SELECT p.*, c.name as category_name 
@@ -19,7 +37,7 @@ class Product extends BaseModel {
         }
         
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function search($term, $limit = 20) {
@@ -34,7 +52,7 @@ class Product extends BaseModel {
         $stmt->bindValue(':term', "%$term%");
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function getFeatured($limit = 6) {
@@ -47,7 +65,7 @@ class Product extends BaseModel {
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function delete($id) {

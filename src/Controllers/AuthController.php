@@ -136,6 +136,11 @@ class AuthController {
             ];
             if (!empty($data['first_name']) && !empty($data['last_name'])) {
                 $this->userModel->update($userId, $data);
+
+                            // UPDATE SESSION WITH NEW DATA
+            $_SESSION['user_name'] = $data['first_name'] . ' ' . $data['last_name'];
+            $_SESSION['user_phone'] = $data['phone'];
+            
                 $success = 'Profile updated successfully!';
             } else {
                 $error = 'First name and last name are required';

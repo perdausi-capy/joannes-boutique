@@ -12,7 +12,7 @@ if ($booking['order_type'] === 'rental' && !empty($booking['rental_end'])) {
 
     if ($today > $rentalEnd) {
         $daysLate = $today->diff($rentalEnd)->days;
-        $penaltyPerDay = 500; // Adjust penalty per day here
+        $penaltyPerDay = 250; // Adjust penalty per day here
         $penaltyAmount = $penaltyPerDay;
     }
 }

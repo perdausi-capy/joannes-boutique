@@ -192,6 +192,7 @@ $pageTitle = "Gallery | Joanne's";
             inset 0 2px 4px rgba(255, 255, 255, 0.3),
             inset 0 -2px 4px rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(4px);
+        text-align:center;
     }
 
     .reserved-badge::after {
@@ -527,11 +528,18 @@ $pageTitle = "Gallery | Joanne's";
                                     </div>
                                     
                                     <div class="product-overlay">
-                                        <a href="products/show/<?php echo (int)$product['id']; ?>" 
-                                           class="flex items-center gap-2 bg-white text-gray-900 px-5 py-2 rounded-lg font-semibold hover:bg-yellow-400 hover:text-white transition-all shadow-lg transform hover:scale-105">
-                                            <i class="fas fa-eye"></i>
-                                            Quick View
-                                        </a>
+                                        <?php if ($product['is_reserved'] ?? false): ?>
+                                            <span class="flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-lg font-semibold shadow-lg opacity-75 cursor-not-allowed">
+                                                <i class="fas fa-lock"></i>
+                                                Reserved
+                                            </span>
+                                        <?php else: ?>
+                                            <a href="products/show/<?php echo (int)$product['id']; ?>" 
+                                            class="flex items-center gap-2 bg-white text-gray-900 px-5 py-2 rounded-lg font-semibold hover:bg-yellow-400 hover:text-white transition-all shadow-lg transform hover:scale-105">
+                                                <i class="fas fa-eye"></i>
+                                                Quick View
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 
@@ -559,16 +567,20 @@ $pageTitle = "Gallery | Joanne's";
                                         </div>
                                     </div>
                                     
-                                    <div class="flex gap-2">
-                                        <!-- <a href="products/show/<?php echo (int)$product['id']; ?>" 
-                                           class="flex-1 text-center px-4 py-3 border-2 border-yellow-600 text-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition-all font-semibold">
-                                            Details
-                                        </a> -->
+                                    <!-- UPDATED PHP CODE: -->
+                                <div class="flex gap-2">
+                                    <?php if ($product['is_reserved'] ?? false): ?>
+                                        <button disabled
+                                                class="flex-1 text-center px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold opacity-60">
+                                            <i class="fas fa-lock mr-2"></i>Reserved
+                                        </button>
+                                    <?php else: ?>
                                         <a href="products/show/<?php echo (int)$product['id']; ?>" 
-                                           class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">
+                                        class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">
                                             Rent Now
                                         </a>
-                                    </div>
+                                    <?php endif; ?>
+                                </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -913,12 +925,19 @@ function renderProducts(products, pagination) {
                     }
                 </div>
                 
+                
                 <div class="product-overlay">
-                    <a href="products/show/${product.id}" 
-                       class="flex items-center gap-2 bg-white text-gray-900 px-5 py-2 rounded-lg font-semibold hover:bg-yellow-400 hover:text-white transition-all shadow-lg transform hover:scale-105">
-                        <i class="fas fa-eye"></i>
-                        Quick View
-                    </a>
+                    ${product.is_reserved ? 
+                        `<span class="flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-lg font-semibold shadow-lg opacity-75 cursor-not-allowed">
+                            <i class="fas fa-lock"></i>
+                            Reserved
+                        </span>` :
+                        `<a href="products/show/${product.id}" 
+                        class="flex items-center gap-2 bg-white text-gray-900 px-5 py-2 rounded-lg font-semibold hover:bg-yellow-400 hover:text-white transition-all shadow-lg transform hover:scale-105">
+                            <i class="fas fa-eye"></i>
+                            Quick View
+                        </a>`
+                    }
                 </div>
             </div>
             
@@ -947,15 +966,19 @@ function renderProducts(products, pagination) {
                 </div>
                 
                 <div class="flex gap-2">
-                    <a href="products/show/${product.id}" 
-                       class="flex-1 text-center px-4 py-3 border-2 border-yellow-600 text-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition-all font-semibold">
-                        Details
-                    </a>
-                    <a href="products/show/${product.id}" 
-                       class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">
-                        Rent Now
-                    </a>
+                    ${product.is_reserved ? 
+                        `<button disabled
+                                class="flex-1 text-center px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold opacity-60">
+                            <i class="fas fa-lock mr-2"></i>Reserved
+                        </button>` :
+                        `<a href="products/show/${product.id}" 
+                           class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">
+                            Rent Now
+                        </a>`
+                    }
                 </div>
+
+                
             </div>
         </div>
     `).join('');

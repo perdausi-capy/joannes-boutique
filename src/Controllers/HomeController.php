@@ -337,9 +337,9 @@ class HomeController {
                                 </span>
                             </div>
                             <div class="flex gap-2">
-                                <a href="products/show/<?php echo $product['id']; ?>" 
+                                <a href="products" 
                                    class="flex-1 text-center px-4 py-3 border-2 border-yellow-600 text-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition-all font-semibold">
-                                   Rent Now
+                                   View in Gallery
                                 </a>
                                 <!-- <button onclick="openRentalModal(<?php echo (int)$product['id']; ?>, <?php echo htmlspecialchars(json_encode($product['name']), ENT_QUOTES); ?>, <?php echo (float)$product['price']; ?>)" 
                                         class="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">
