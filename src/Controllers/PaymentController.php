@@ -254,6 +254,8 @@ class PaymentController
             $orderId = $this->bookingOrderModel->create($orderData);
             
             if ($orderId) {
+                // AUTO-RESERVE: Mark package as reserved after successful booking
+                $this->packageModel->update($packageId, ['is_reserved' => 1]);
                 error_log("Package booking created successfully. Order ID: {$orderId}, Package ID: {$packageId}");
                 header('Location: ' . BASE_URL . 'payment?order_id=' . $orderId);
                 exit;

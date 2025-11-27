@@ -246,6 +246,33 @@
             transform: translateY(0);
         }
     }
+
+    .reserved-badge {
+        background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 
+            0 8px 20px rgba(220, 38, 38, 0.4),
+            0 4px 12px rgba(153, 27, 27, 0.3),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(4px);
+    }
+
+    .reserved-badge::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.2) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.15) 100%
+        );
+        border-radius: inherit;
+        pointer-events: none;
+    }
 </style>
 
 <!-- Hero Section -->
@@ -265,7 +292,7 @@
                 Discover our carefully curated packages designed to make your special day unforgettable. From intimate ceremonies to grand celebrations.
             </p>
         </div>
-    </div>
+    </div>  
 </section>
 
 <!-- Packages Section -->
@@ -288,22 +315,32 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php foreach ($packages as $p): ?>
                     <div class="package-card-enhanced scroll-reveal">
-                        <div class="package-image">
-                            <?php if (!empty($p['background_image'])): ?>
-                                <img src="<?php echo rtrim(BASE_URL, '/') . '/uploads/' . htmlspecialchars($p['background_image']); ?>" 
-                                     alt="<?php echo htmlspecialchars($p['package_name']); ?>">
-                            <?php else: ?>
-                                <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                                    <i class="fas fa-crown text-yellow-400 text-6xl opacity-30"></i>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($p['price'])): ?>
-                                <div class="package-badge">
-                                    ₱<?php echo number_format($p['price'], 2); ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                    <div class="package-image">
+                        <?php if (!empty($p['background_image'])): ?>
+                            <img src="<?php echo rtrim(BASE_URL, '/') . '/uploads/' . htmlspecialchars($p['background_image']); ?>" 
+                                alt="<?php echo htmlspecialchars($p['package_name']); ?>">
+                        <?php else: ?>
+                            <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                <i class="fas fa-crown text-yellow-400 text-6xl opacity-30"></i>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($p['price'])): ?>
+                            <div class="package-badge">
+                                ₱<?php echo number_format($p['price'], 2); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- ADD THIS NEW CODE HERE -->
+                        <?php if ($p['is_reserved'] ?? false): ?>
+                            <div class="reserved-badge px-3 py-2 rounded-full text-white text-xs font-semibold shadow-lg" 
+                                style="position: absolute; top: 20px; left: 20px; background-color: #EF4444;">
+                                <i class="fas fa-lock mr-1"></i>
+                                Reserved
+                            </div>
+                        <?php endif; ?>
+                        <!-- END NEW CODE -->
+                    </div>
                         
                         <div class="package-card-content">
                             <div class="package-card-body">
@@ -364,13 +401,25 @@
                             <div class="package-card-footer">
                                 <div class="flex gap-2">
                                     <a href="packages/view/<?php echo (int)$p['package_id']; ?>" 
-                                       class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
+                                    class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
                                         <span>View Details</span>
                                     </a>
-                                    <button onclick="openBookingModal(<?php echo (int)$p['package_id']; ?>, '<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>', <?php echo $p['price'] ?? 0; ?>)" 
-                                            class="flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg">
-                                        <span>Book Now</span>
-                                    </button>
+                                    
+                                    <?php if ($p['is_reserved'] ?? false): ?>
+                                        <button disabled
+                                                class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold opacity-60">
+                                            <i class="fas fa-lock mr-2"></i>Reserved
+                                        </button>
+                                    <?php else: ?>
+                                        <!-- To this -->
+                                        <button class="book-now-btn" 
+                                                data-package-id="<?php echo (int)$p['package_id']; ?>" 
+                                                data-package-name="<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>" 
+                                                data-package-price="<?php echo $p['price'] ?? 0; ?>"
+                                                class="flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg">
+                                            <span class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">Book Now</span>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -511,7 +560,19 @@
     </div>
 </section>
 
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
+
+window.addEventListener('alpine:init', () => {
+    console.log('Alpine.js initialized successfully');
+    console.log('bookingModal function exists?', typeof bookingModal === 'function');
+});
+
+// Check Alpine exists
+setTimeout(() => {
+    console.log('Alpine loaded?', typeof Alpine !== 'undefined');
+}, 1000);   
 // Scroll reveal animation
 const observerOptions = {
     threshold: 0.1,
@@ -590,7 +651,9 @@ function bookingModal() {
                     
                     console.log('Checking package availability for item_id:', packageId, 'event_date:', eventDate);
                     
-                    const apiUrl = `<?php echo BASE_URL; ?>api/check_availability?item_id=${packageId}&order_type=package&start_date=${eventDate}`;
+                    const apiUrl = '<?php echo BASE_URL; ?>' + 
+                    'api/check_availability?item_id=' + packageId + 
+                    '&order_type=package&start_date=' + eventDate;
                     console.log('API URL:', apiUrl);
                     
                     const response = await fetch(apiUrl);
@@ -667,4 +730,21 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+// Event delegation for book now buttons
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('book-now-btn') || e.target.closest('.book-now-btn')) {
+        const btn = e.target.classList.contains('book-now-btn') ? e.target : e.target.closest('.book-now-btn');
+        const packageId = btn.dataset.packageId;
+        const packageName = btn.dataset.packageName;
+        const packagePrice = parseFloat(btn.dataset.packagePrice);
+        openBookingModal(packageId, packageName, packagePrice);
+    }
+});
+
+
+console.log('Alpine loaded?', typeof Alpine !== 'undefined');
+console.log('bookingModal function exists?', typeof bookingModal === 'function');
 </script>
+</script>
+
