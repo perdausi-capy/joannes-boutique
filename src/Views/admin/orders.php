@@ -120,6 +120,17 @@
                                 <span x-text="currentTab === 'all' ? 'booking(s)' : currentTab + ' booking(s)'"></span>
                             </p>
                         </div>
+                        
+                        <!-- SEARCH BAR -->
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                placeholder="Search by name, email, or order #..."
+                                class="pl-10 pr-4 py-2.5 w-80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+                                onkeyup="searchBookings(this.value)"
+                            >
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -133,7 +144,9 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 <template x-for="booking in filteredBookings" :key="booking.order_id">
-                                    <tr class="table-row" :class="{ 'overdue penalty-highlight': booking.penaltyInfo && booking.penaltyInfo.isOverdue && !booking.is_penalty_paid }">
+                                    <tr class="table-row booking-row" 
+                                        :data-search="(booking.contact_name + ' ' + booking.contact_email + ' ' + booking.order_id).toLowerCase()"
+                                        :class="{ 'overdue penalty-highlight': booking.penaltyInfo && booking.penaltyInfo.isOverdue && !booking.is_penalty_paid }">
                                         <td class="px-6 py-4 font-mono font-semibold text-gray-900" x-text="'#' + booking.order_id"></td>
                                         <td class="px-6 py-4">
                                             <span class="status-badge" 
@@ -209,21 +222,6 @@
                                             </template>
                                         </td>
                                         
-                                        <!-- <td class="px-6 py-4">
-                                            <span class="status-badge"
-                                                  :class="{
-                                                      'bg-green-100 text-green-700': booking.payment_status === 'verified',
-                                                      'bg-blue-100 text-blue-700': booking.payment_status === 'paid',
-                                                      'bg-yellow-100 text-yellow-700': booking.payment_status === 'pending'
-                                                  }">
-                                                <i :class="{
-                                                    'fas fa-check-double': booking.payment_status === 'verified',
-                                                    'fas fa-check-circle': booking.payment_status === 'paid',
-                                                    'fas fa-clock': booking.payment_status === 'pending'
-                                                }" class="mr-1"></i>
-                                                <span x-text="booking.payment_status.charAt(0).toUpperCase() + booking.payment_status.slice(1)"></span>
-                                            </span>
-                                        </td> -->
                                         <td class="px-6 py-4 text-sm text-gray-600" x-text="new Date(booking.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})"></td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
@@ -262,6 +260,21 @@
     </div>
 
     <script>
+    // Search function (vanilla JS like categories page)
+    function searchBookings(query) {
+        const rows = document.querySelectorAll('.booking-row');
+        const searchTerm = query.toLowerCase().trim();
+        
+        rows.forEach(row => {
+            const searchData = row.getAttribute('data-search');
+            if (searchData && searchData.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
     function bookingManager() {
         return {
             currentTab: 'all',
@@ -314,7 +327,6 @@
                 } else if (this.currentTab === 'rental') {
                     filtered = filtered.filter(b => b.order_type === 'rental');
                 } else if (this.currentTab === 'package') {
-                    // For packages, don't show penalty column data
                     filtered = filtered.filter(b => b.order_type === 'package');
                 }
                 
@@ -365,7 +377,7 @@
                 window.thisParent = this;
                 this.isRefreshing = true;
                 this.refreshBookings();
-                this.refreshInterval = setInterval(() => this.refreshBookings(), 30000); // 30 seconds
+                this.refreshInterval = setInterval(() => this.refreshBookings(), 30000);
             },
             
             destroy() {

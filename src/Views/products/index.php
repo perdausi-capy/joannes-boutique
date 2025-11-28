@@ -386,6 +386,54 @@ $pageTitle = "Gallery | Joanne's";
         display: block;
         animation: fadeInUp 0.5s;
     }
+
+/* Availability Tooltip Styles */
+.availability-tooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    transform: translateY(10px);
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin-top: 0.5rem;
+    min-width: 180px;
+    text-align: center;
+}
+
+.availability-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 1rem;
+    border: 8px solid transparent;
+    border-bottom-color: #DC2626;
+}
+
+.product-card-gallery:hover .availability-tooltip {
+    opacity: 1;
+    transform: translateY(5px);
+}
+
+.availability-tooltip i {
+    margin-right: 0.5rem;
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
 </style>
 
 <div class="gallery-hero py-20 relative">
@@ -514,12 +562,22 @@ $pageTitle = "Gallery | Joanne's";
                                     <?php endif; ?>
                                     
                                     <!-- Badges Container -->
+                                    <!-- Badges Container -->
                                     <div class="absolute top-2 right-2 flex flex-col gap-2">
                                         <?php if ($product['is_reserved'] ?? false): ?>
                                             <div class="reserved-badge px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg" style="background-color: #EF4444;">
                                                 Reserved
                                             </div>
+                                            
+                                            <!-- Availability Tooltip -->
+                                            <?php if (!empty($product['next_available_date'])): ?>
+                                                <div class="availability-tooltip">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    Available: <?php echo date('M j, Y', strtotime($product['next_available_date'])); ?>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endif; ?>
+                                        
                                         <?php if ($product['is_featured'] ?? false): ?>
                                             <div class="featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
                                                 ⭐ Featured
@@ -916,7 +974,13 @@ function renderProducts(products, pagination) {
                     ${product.is_reserved ? 
                         `<div class="reserved-badge px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg" style="background-color: #EF4444;">
                             Reserved
-                        </div>` : ''
+                        </div>
+                        ${product.next_available_date ? 
+                            `<div class="availability-tooltip">
+                                <i class="fas fa-calendar-alt"></i>
+                                Available: ${new Date(product.next_available_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </div>` : ''
+                        }` : ''
                     }
                     ${product.is_featured ? 
                         `<div class="featured-badge px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg">
