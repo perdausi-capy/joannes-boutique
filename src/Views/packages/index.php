@@ -1,4 +1,13 @@
-<?php $pageTitle = "Packages | Joanne's"; ?>
+<?php $pageTitle = "Packages | Joanne's"; 
+
+$user = $_SESSION['user'] ?? [];
+
+// At the top of the file
+$userName = $_SESSION['user_name'] ?? '';
+$userEmail = $_SESSION['user_email'] ?? '';
+$userPhone = $_SESSION['user_phone'] ?? '';
+
+?>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
@@ -69,13 +78,20 @@
         overflow: hidden;
         position: relative;
         flex-shrink: 0;
+        border-radius: 24px 24px 0 0; /* Match card border radius */
     }
-    
     .package-card-enhanced .package-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.6s ease;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: scale(1);
+    }
+    .package-card-enhanced .package-image {
+        height: 280px;
+        overflow: visible;  /* CHANGED: Allow tooltip to show outside */
+        position: relative;
+        flex-shrink: 0;
     }
     
     .package-card-enhanced:hover .package-image img {
@@ -247,32 +263,106 @@
         }
     }
 
-    .reserved-badge {
-        background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-        position: relative;
-        overflow: hidden;
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 
-            0 8px 20px rgba(220, 38, 38, 0.4),
-            0 4px 12px rgba(153, 27, 27, 0.3),
-            inset 0 2px 4px rgba(255, 255, 255, 0.3),
-            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(4px);
-    }
+/* ===================================================
+   CORRECTED TOOLTIP & BADGE CSS - MATCHING GALLERY
+   Replace your existing .reserved-badge and .availability-tooltip
+   with these styles in packages/index.php
+   =================================================== */
 
-    .reserved-badge::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.2) 0%,
-            transparent 50%,
-            rgba(0, 0, 0, 0.15) 100%
-        );
-        border-radius: inherit;
-        pointer-events: none;
-    }
+/* Reserved Badge */
+.reserved-badge {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 8px 20px rgba(220, 38, 38, 0.4),
+        0 4px 12px rgba(153, 27, 27, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    text-align: center;
+
+}
+
+.reserved-badge::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.15) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.badge-icon {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    animation: icon-glow 2s ease-in-out infinite;
+}
+
+@keyframes icon-glow {
+    0%, 100% { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
+    50% { filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.5)); }
+}
+
+/* Badge Text */
+.badge-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Availability Tooltip - Matching Gallery */
+.availability-tooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    transform: translateY(10px);
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin-top: 0.5rem;
+    min-width: 180px;
+    text-align: center;
+}
+
+.availability-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 1rem;
+    border: 8px solid transparent;
+    border-bottom-color: #DC2626;
+}
+
+.package-card-enhanced:hover .availability-tooltip {
+    opacity: 1;
+    transform: translateY(5px);
+}
+
+.availability-tooltip i {
+    margin-right: 0.5rem;
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
 </style>
 
 <!-- Hero Section -->
@@ -313,118 +403,130 @@
             </div>
         <?php else: ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php foreach ($packages as $p): ?>
-                    <div class="package-card-enhanced scroll-reveal">
-                    <div class="package-image">
-                        <?php if (!empty($p['background_image'])): ?>
-                            <img src="<?php echo rtrim(BASE_URL, '/') . '/uploads/' . htmlspecialchars($p['background_image']); ?>" 
-                                alt="<?php echo htmlspecialchars($p['package_name']); ?>">
-                        <?php else: ?>
-                            <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                                <i class="fas fa-crown text-yellow-400 text-6xl opacity-30"></i>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($p['price'])): ?>
-                            <div class="package-badge">
-                                ₱<?php echo number_format($p['price'], 2); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- ADD THIS NEW CODE HERE -->
-                        <?php if ($p['is_reserved'] ?? false): ?>
-                            <div class="reserved-badge px-3 py-2 rounded-full text-white text-xs font-semibold shadow-lg" 
-                                style="position: absolute; top: 20px; left: 20px; background-color: #EF4444;">
-                                <i class="fas fa-lock mr-1"></i>
-                                Reserved
-                            </div>
-                        <?php endif; ?>
-                        <!-- END NEW CODE -->
+<!-- FIND THIS SECTION in packages/index.php (around line 350) -->
+<!-- REPLACE YOUR ENTIRE PACKAGE CARD FOREACH LOOP WITH THIS -->
+<!-- This matches the working gallery page structure exactly -->
+
+<?php foreach ($packages as $p): ?>
+    <div class="package-card-enhanced scroll-reveal">
+        <div class="package-image" style="position: relative;">
+            <?php if (!empty($p['background_image'])): ?>
+                <img src="<?php echo rtrim(BASE_URL, '/') . '/uploads/' . htmlspecialchars($p['background_image']); ?>" 
+                    alt="<?php echo htmlspecialchars($p['package_name']); ?>">
+            <?php else: ?>
+                <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <i class="fas fa-crown text-yellow-400 text-6xl opacity-30"></i>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($p['price'])): ?>
+    <div class="package-badge" style="<?php echo ($p['is_reserved'] ?? false) ? 'top: 50px;' : 'top: 12px;'; ?> right: 12px;">
+        ₱<?php echo number_format($p['price'], 2); ?>
+    </div>
+<?php endif; ?>
+            
+            <!-- Badges Container (Top Right) - MATCHING GALLERY -->
+            <div class="absolute top-2 right-2 flex flex-col gap-2">
+                <?php if ($p['is_reserved'] ?? false): ?>
+                    <div class="reserved-badge px-2 py-1 rounded-full text-white text-xs font-semibold shadow-lg">
+                        <i class="fas fa-lock badge-icon"></i>
+                        <span class="badge-text">Reserved</span>
                     </div>
-                        
-                        <div class="package-card-content">
-                            <div class="package-card-body">
+                    
+                    <!-- Availability Tooltip -->
+                    <?php if (!empty($p['next_available_date'])): ?>
+                        <div class="availability-tooltip">
+                            <i class="fas fa-calendar-alt"></i>
+                            Available: <?php echo date('M j, Y', strtotime($p['next_available_date'])); ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Rest of your card content... -->
+        
+        <div class="package-card-content">
+            <div class="package-card-body">
+                <div>
+                    <h2 class="font-serif-elegant text-2xl font-bold text-gray-900 mb-2">
+                        <?php echo htmlspecialchars($p['package_name']); ?>
+                    </h2>
+                    
+                    <?php if (!empty($p['hotel_name'])): ?>
+                        <div class="flex items-center gap-2 text-gray-600 mb-1">
+                            <i class="fas fa-hotel text-yellow-600 flex-shrink-0"></i>
+                            <span class="font-medium text-truncate-2"><?php echo htmlspecialchars($p['hotel_name']); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($p['hotel_address'])): ?>
+                        <div class="flex items-center gap-2 text-gray-500 text-sm">
+                            <i class="fas fa-map-marker-alt text-yellow-600 flex-shrink-0"></i>
+                            <span class="text-truncate-2"><?php echo htmlspecialchars($p['hotel_address']); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if (!empty($p['hotel_description'])): ?>
+                    <p class="text-gray-600 text-sm leading-relaxed text-truncate-3">
+                        <?php echo htmlspecialchars($p['hotel_description']); ?>
+                    </p>
+                <?php endif; ?>
+                
+                <?php $inc = json_decode($p['inclusions'] ?? '{}', true) ?: []; ?>
+                <?php if (!empty($inc)): ?>
+                    <div class="space-y-3 pt-2 border-t border-gray-100">
+                        <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                            <i class="fas fa-check-circle text-yellow-600"></i>
+                            Package Includes:
+                        </h3>
+                        <div class="space-y-2">
+                            <?php $shown = 0; foreach ($inc as $label => $items): if ($shown >= 2) break; if (empty($items)) continue; $shown++; ?>
                                 <div>
-                                    <h2 class="font-serif-elegant text-2xl font-bold text-gray-900 mb-2">
-                                        <?php echo htmlspecialchars($p['package_name']); ?>
-                                    </h2>
-                                    
-                                    <?php if (!empty($p['hotel_name'])): ?>
-                                        <div class="flex items-center gap-2 text-gray-600 mb-1">
-                                            <i class="fas fa-hotel text-yellow-600 flex-shrink-0"></i>
-                                            <span class="font-medium text-truncate-2"><?php echo htmlspecialchars($p['hotel_name']); ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (!empty($p['hotel_address'])): ?>
-                                        <div class="flex items-center gap-2 text-gray-500 text-sm">
-                                            <i class="fas fa-map-marker-alt text-yellow-600 flex-shrink-0"></i>
-                                            <span class="text-truncate-2"><?php echo htmlspecialchars($p['hotel_address']); ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <?php if (!empty($p['hotel_description'])): ?>
-                                    <p class="text-gray-600 text-sm leading-relaxed text-truncate-3">
-                                        <?php echo htmlspecialchars($p['hotel_description']); ?>
+                                    <p class="text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
+                                        <?php echo htmlspecialchars($label); ?>
                                     </p>
-                                <?php endif; ?>
-                                
-                                <?php $inc = json_decode($p['inclusions'] ?? '{}', true) ?: []; ?>
-                                <?php if (!empty($inc)): ?>
-                                    <div class="space-y-3 pt-2 border-t border-gray-100">
-                                        <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                            <i class="fas fa-check-circle text-yellow-600"></i>
-                                            Package Includes:
-                                        </h3>
-                                        <div class="space-y-2">
-                                            <?php $shown = 0; foreach ($inc as $label => $items): if ($shown >= 2) break; if (empty($items)) continue; $shown++; ?>
-                                                <div>
-                                                    <p class="text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">
-                                                        <?php echo htmlspecialchars($label); ?>
-                                                    </p>
-                                                    <div class="flex flex-wrap gap-1">
-                                                        <?php $i = 0; foreach ($items as $it): if ($i >= 3) break; $i++; ?>
-                                                            <span class="inclusion-badge">
-                                                                <i class="fas fa-check text-xs"></i>
-                                                                <?php echo htmlspecialchars($it); ?>
-                                                            </span>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <?php $i = 0; foreach ($items as $it): if ($i >= 3) break; $i++; ?>
+                                            <span class="inclusion-badge">
+                                                <i class="fas fa-check text-xs"></i>
+                                                <?php echo htmlspecialchars($it); ?>
+                                            </span>
+                                        <?php endforeach; ?>
                                     </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="package-card-footer">
-                                <div class="flex gap-2">
-                                    <a href="packages/view/<?php echo (int)$p['package_id']; ?>" 
-                                    class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
-                                        <span>View Details</span>
-                                    </a>
-                                    
-                                    <?php if ($p['is_reserved'] ?? false): ?>
-                                        <button disabled
-                                                class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold opacity-60">
-                                            <i class="fas fa-lock mr-2"></i>Reserved
-                                        </button>
-                                    <?php else: ?>
-                                        <!-- To this -->
-                                        <button class="book-now-btn" 
-                                                data-package-id="<?php echo (int)$p['package_id']; ?>" 
-                                                data-package-name="<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>" 
-                                                data-package-price="<?php echo $p['price'] ?? 0; ?>"
-                                                class="flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg">
-                                            <span class="flex-1 text-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all font-semibold shadow-lg">Book Now</span>
-                                        </button>
-                                    <?php endif; ?>
                                 </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <div class="package-card-footer">
+                <div class="flex gap-2">
+                    <a href="packages/view/<?php echo (int)$p['package_id']; ?>" 
+                       class="flex-1 text-center px-4 py-3 btn-outline-gold rounded-lg font-semibold">
+                        <span>View Details</span>
+                    </a>
+                    
+                    <?php if ($p['is_reserved'] ?? false): ?>
+                        <button disabled
+                                class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-semibold opacity-60">
+                            <i class="fas fa-lock mr-2"></i>Reserved
+                        </button>
+                    <?php else: ?>
+                        <button class="book-now-btn flex-1 px-4 py-3 btn-gold-elegant text-white rounded-lg font-semibold shadow-lg"
+                                data-package-id="<?php echo (int)$p['package_id']; ?>" 
+                                data-package-name="<?php echo htmlspecialchars($p['package_name'], ENT_QUOTES); ?>" 
+                                data-package-price="<?php echo $p['price'] ?? 0; ?>">
+                            <span>Book Now</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -462,6 +564,8 @@
                 
                 <form method="POST" action="package/book" class="space-y-5">
                     <input type="hidden" name="package_id" x-model="form.package_id">
+                    <input type="hidden" name="csrf_token" value="<?php echo CSRF::generateToken(); ?>">
+                    
                     
                     <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200">
                         <label class="block text-xs font-semibold text-yellow-800 mb-1 uppercase tracking-wide">Selected Package</label>
@@ -513,23 +617,29 @@
                                     <i class="fas fa-user text-yellow-600 mr-1"></i>
                                     Full Name *
                                 </label>
-                                <input type="text" id="contact_name" name="contact_name" x-model="form.contact_name" required
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors">
+                                
+                                <input type="text" id="contact_name" name="contact_name" required
+                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors"
+                                       value="<?php echo htmlspecialchars($userName); ?>"
+                                       >
                             </div>
                             <div>
                                 <label for="contact_email" class="block text-sm font-semibold text-gray-700 mb-2">
                                     <i class="fas fa-envelope text-yellow-600 mr-1"></i>
                                     Email Address *
                                 </label>
-                                <input type="email" id="contact_email" name="contact_email" x-model="form.contact_email" required
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors">
+                                <input type="email" id="contact_email" name="contact_email" required
+                                value="<?php echo htmlspecialchars($userEmail); ?>"
+                                       class="input-enhanced w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none">
                             </div>
+
                             <div>
                                 <label for="contact_phone" class="block text-sm font-semibold text-gray-700 mb-2">
                                     <i class="fas fa-phone text-yellow-600 mr-1"></i>
                                     Phone Number *
                                 </label>
-                                <input type="tel" id="contact_phone" maxlength="11" name="contact_phone" x-model="form.contact_phone" required
+                                <input type="tel" id="contact_phone" maxlength="11" name="contact_phone" required
+                                value="<?php echo htmlspecialchars($userPhone); ?>"
                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 transition-colors">
                             </div>
                         </div>

@@ -24,7 +24,7 @@ class BookingOrder extends BaseModel
             $data['rental_start'] ?? null,
             $data['rental_end'] ?? null,
             $data['total_amount'],
-            $data['payment_status'] ?? 'pending',
+            $data['payment_status'] ?? 'verified',
             $data['payment_method'] ?? 'GCash',
             $data['contact_name'] ?? null,
             $data['contact_email'] ?? null,

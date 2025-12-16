@@ -621,16 +621,94 @@ class AdminController {
         $this->render('admin/booking-view', ['booking' => $booking]);
     }
     
-    public function verifyBooking($id) {
-        Auth::requireAdmin();
-        require_once __DIR__ . '/../Models/BookingOrder.php';
-        $bookingOrderModel = new BookingOrder();
-        
-        $bookingOrderModel->verifyPayment($id);
-        
-        header('Location: ' . BASE_URL . 'admin/orders');
-        exit;
-    }
+/**
+ * UPDATE the verifyBooking() method in src/Controllers/AdminController.php
+ * Add package reservation logic after payment verification
+ */
+
+ public function verifyBooking($id)
+ {
+     Auth::requireAdmin();
+     
+     try {
+         $bookingOrderModel = new BookingOrder();
+         $packageModel = new Package();
+         
+         // Get booking details before verification
+         $booking = $bookingOrderModel->findByOrderId($id);
+         
+         if (!$booking) {
+             $_SESSION['error'] = 'Booking not found';
+             header('Location: ' . BASE_URL . 'admin/bookings');
+             exit;
+         }
+         
+         // Verify the payment
+         $success = $bookingOrderModel->verifyPayment($id);
+         
+         if ($success) {
+             // ✅ NEW: If this is a package booking, mark package as reserved
+             if ($booking['order_type'] === 'package') {
+                 $packageId = $booking['item_id'];
+                 
+                 // Reserve the package
+                 $packageModel->update($packageId, ['is_reserved' => 1]);
+                 
+                 error_log("Package reserved after payment verification: Package ID {$packageId}, Order ID {$id}");
+                 
+                 $_SESSION['success'] = 'Payment verified successfully! Package has been reserved.';
+             } else {
+                 $_SESSION['success'] = 'Payment verified successfully!';
+             }
+             
+             header('Location: ' . BASE_URL . 'admin/bookings/view/' . $id);
+         } else {
+             $_SESSION['error'] = 'Failed to verify payment';
+             header('Location: ' . BASE_URL . 'admin/bookings/view/' . $id);
+         }
+     } catch (Exception $e) {
+         error_log('Error verifying booking: ' . $e->getMessage());
+         $_SESSION['error'] = 'An error occurred while verifying the booking';
+         header('Location: ' . BASE_URL . 'admin/bookings');
+     }
+     exit;
+ }
+ 
+ /**
+  * NEW METHOD: Add this to AdminController
+  * Manually unlock a package (for admin override)
+  * 
+  * @param int $packageId The package ID to unlock
+  */
+ public function unlockPackage($packageId)
+ {
+     Auth::requireAdmin();
+     
+     try {
+         $packageModel = new Package();
+         
+         $package = $packageModel->findById($packageId);
+         
+         if (!$package) {
+             $_SESSION['error'] = 'Package not found';
+             header('Location: ' . BASE_URL . 'admin/packages');
+             exit;
+         }
+         
+         // Unlock the package
+         $packageModel->update($packageId, ['is_reserved' => 0]);
+         
+         error_log("Admin manually unlocked package: {$package['package_name']} (ID: {$packageId})");
+         
+         $_SESSION['success'] = 'Package unlocked successfully!';
+         header('Location: ' . BASE_URL . 'admin/packages');
+     } catch (Exception $e) {
+         error_log('Error unlocking package: ' . $e->getMessage());
+         $_SESSION['error'] = 'An error occurred while unlocking the package';
+         header('Location: ' . BASE_URL . 'admin/packages');
+     }
+     exit;
+ }
 
     public function resolvePenalty() {
         Auth::requireAdmin();

@@ -237,6 +237,14 @@ switch (true) {
         require __DIR__ . '/../api/check_availability.php';
         break;
 
+// Change this pattern to match your existing style
+case $path === '/admin/bookings/make-available' && $_SERVER['REQUEST_METHOD'] === 'POST':
+    $orderId = $_POST['order_id'] ?? null;
+    (new AdminController())->makePackageAvailable($orderId);
+    break;
+
+    
+
     // Category toggle route (for AJAX)
     case preg_match('#^/admin/categories/toggle/(\d+)$#', $path, $m) && $_SERVER['REQUEST_METHOD'] === 'POST':
         Auth::requireAdmin();

@@ -154,124 +154,134 @@ class PaymentController
         }
     }
     
-    public function createPackageBooking()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . BASE_URL . 'packages');
-            exit;
-        }
+/**
+ * REPLACE the createPackageBooking() method in src/Controllers/PaymentController.php
+ * with this updated version
+ */
 
-        // Require authentication for booking packages
-        if (!Auth::isLoggedIn()) {
-            $_SESSION['error'] = 'Please login to book packages.';
-            header('Location: ' . BASE_URL . 'auth/login');
-            exit;
-        }
-        
-        $packageId = (int)($_POST['package_id'] ?? 0);
-        $eventDate = trim($_POST['event_date'] ?? '');
-        $numberOfGuests = (int)($_POST['number_of_guests'] ?? 0);
-        $contactName = trim($_POST['contact_name'] ?? '');
-        $contactEmail = trim($_POST['contact_email'] ?? '');
-        $contactPhone = trim($_POST['contact_phone'] ?? '');
-        
-        // Validate required fields
-        if (empty($eventDate)) {
-            error_log("Package booking validation failed: Missing event date. Package ID: {$packageId}");
-            $_SESSION['error'] = 'Please select an event date.';
-            header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-            exit;
-        }
-        
-        // Validate date format
-        $eventTimestamp = strtotime($eventDate);
-        if ($eventTimestamp === false) {
-            error_log("Package booking validation failed: Invalid date format. Event Date: {$eventDate}");
-            $_SESSION['error'] = 'Invalid date format. Please select a valid date.';
-            header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-            exit;
-        }
-        
-        // Get package details
-        $package = $this->packageModel->findById($packageId);
-        if (!$package) {
-            error_log("Package booking validation failed: Package not found. Package ID: {$packageId}");
-            $_SESSION['error'] = 'Package not found';
-            header('Location: ' . BASE_URL . 'packages');
-            exit;
-        }
-        
-        // Check availability before creating order
-        // IMPORTANT: This validates for the SPECIFIC package_id to prevent double-booking
-        try {
-            error_log("Validating package availability: item_id={$packageId}, type=package, event_date={$eventDate}");
-            
-            $availability = $this->bookingOrderModel->checkAvailability(
-                $packageId,  // Specific package ID
-                'package',
-                $eventDate
-            );
-            
-            if (!$availability['available']) {
-                $formattedDate = date('F j, Y', strtotime($eventDate));
-                
-                if (!empty($availability['conflicting_orders'])) {
-                    $conflictInfo = $availability['conflicting_orders'][0];
-                    error_log("Conflict found for item_id={$packageId}: Existing booking order_id={$conflictInfo['order_id']}, event_date={$conflictInfo['event_date']}");
-                }
-                
-                error_log("Package booking validation failed: Date conflict. Package ID: {$packageId}, Event Date: {$eventDate}");
-                $_SESSION['error'] = 'This package is already booked for ' . htmlspecialchars($formattedDate) . '. Please choose a different date.';
-                header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-                exit;
-            }
-            
-            error_log("Package availability confirmed: item_id={$packageId} is available for event_date={$eventDate}");
-        } catch (Exception $e) {
-            error_log("Package availability check exception: " . $e->getMessage() . " | Package ID: {$packageId} | Event Date: {$eventDate}");
-            $_SESSION['error'] = 'An error occurred while checking availability. Please try again.';
-            header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-            exit;
-        }
-        
-        // Calculate total amount
-        $totalAmount = $package['price'] ?? 0;
-        
-        // Create booking order
-        $orderData = [
-            'user_id' => Auth::isLoggedIn() ? $_SESSION['user_id'] : null,
-            'order_type' => 'package',
-            'item_id' => $packageId,
-            'event_date' => $eventDate,
-            'total_amount' => $totalAmount,
-            'contact_name' => $contactName,
-            'contact_email' => $contactEmail,
-            'contact_phone' => $contactPhone,
-            'quantity' => $numberOfGuests
-        ];
-        
-        try {
-            $orderId = $this->bookingOrderModel->create($orderData);
-            
-            if ($orderId) {
-                // AUTO-RESERVE: Mark package as reserved after successful booking
-                $this->packageModel->update($packageId, ['is_reserved' => 1]);
-                error_log("Package booking created successfully. Order ID: {$orderId}, Package ID: {$packageId}");
-                header('Location: ' . BASE_URL . 'payment?order_id=' . $orderId);
-                exit;
-            } else {
-                error_log("Failed to create package booking. Package ID: {$packageId}");
-                $_SESSION['error'] = 'Failed to create package booking. Please try again.';
-                header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-                exit;
-            }
-        } catch (Exception $e) {
-            error_log("Exception creating package booking: " . $e->getMessage() . " | Package ID: {$packageId}");
-            $_SESSION['error'] = 'An error occurred while creating your booking. Please try again.';
-            header('Location: ' . BASE_URL . 'packages/show/' . $packageId);
-            exit;
-        }
-    }
+ public function createPackageBooking()
+ {
+     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+         header('Location: ' . BASE_URL . 'packages');
+         exit;
+     }
+ 
+     // Require authentication for booking packages
+     if (!Auth::isLoggedIn()) {
+         $_SESSION['error'] = 'Please login to book packages.';
+         header('Location: ' . BASE_URL . 'auth/login');
+         exit;
+     }
+     
+     $packageId = (int)($_POST['package_id'] ?? 0);
+     $eventDate = trim($_POST['event_date'] ?? '');
+     $numberOfGuests = (int)($_POST['number_of_guests'] ?? 0);
+     $contactName = trim($_POST['contact_name'] ?? '');
+     $contactEmail = trim($_POST['contact_email'] ?? '');
+     $contactPhone = trim($_POST['contact_phone'] ?? '');
+     
+     // Validate required fields
+     if (empty($eventDate)) {
+         error_log("Package booking validation failed: Missing event date. Package ID: {$packageId}");
+         $_SESSION['error'] = 'Please select an event date.';
+         header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+         exit;
+     }
+     
+     // Validate date format
+     $eventTimestamp = strtotime($eventDate);
+     if ($eventTimestamp === false) {
+         error_log("Package booking validation failed: Invalid date format. Event Date: {$eventDate}");
+         $_SESSION['error'] = 'Invalid date format. Please select a valid date.';
+         header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+         exit;
+     }
+     
+     // Get package details
+     $package = $this->packageModel->findById($packageId);
+     if (!$package) {
+         error_log("Package booking validation failed: Package not found. Package ID: {$packageId}");
+         $_SESSION['error'] = 'Package not found';
+         header('Location: ' . BASE_URL . 'packages');
+         exit;
+     }
+     
+     // Check availability before creating order
+     // IMPORTANT: This validates for the SPECIFIC package_id to prevent double-booking
+     try {
+         error_log("Validating package availability: item_id={$packageId}, type=package, event_date={$eventDate}");
+         
+         $availability = $this->bookingOrderModel->checkAvailability(
+             $packageId,  // Specific package ID
+             'package',
+             $eventDate
+         );
+         
+         if (!$availability['available']) {
+             $formattedDate = date('F j, Y', strtotime($eventDate));
+             
+             if (!empty($availability['conflicting_orders'])) {
+                 $conflictInfo = $availability['conflicting_orders'][0];
+                 error_log("Conflict found for item_id={$packageId}: Existing booking order_id={$conflictInfo['order_id']}, event_date={$conflictInfo['event_date']}");
+             }
+             
+             error_log("Package booking validation failed: Date conflict. Package ID: {$packageId}, Event Date: {$eventDate}");
+             $_SESSION['error'] = 'This package is already booked for ' . htmlspecialchars($formattedDate) . '. Please choose a different date.';
+             header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+             exit;
+         }
+         
+         error_log("Package availability confirmed: item_id={$packageId} is available for event_date={$eventDate}");
+     } catch (Exception $e) {
+         error_log("Package availability check exception: " . $e->getMessage() . " | Package ID: {$packageId} | Event Date: {$eventDate}");
+         $_SESSION['error'] = 'An error occurred while checking availability. Please try again.';
+         header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+         exit;
+     }
+     
+     // Calculate total amount
+     $totalAmount = $package['price'] ?? 0;
+     
+     // Create booking order (status: pending)
+     $orderData = [
+         'user_id' => Auth::isLoggedIn() ? $_SESSION['user_id'] : null,
+         'order_type' => 'package',
+         'item_id' => $packageId,
+         'event_date' => $eventDate,
+         'total_amount' => $totalAmount,
+         'contact_name' => $contactName,
+         'contact_email' => $contactEmail,
+         'contact_phone' => $contactPhone,
+         'quantity' => $numberOfGuests
+     ];
+     
+     try {
+         $orderId = $this->bookingOrderModel->create($orderData);
+         
+         if ($orderId) {
+             // ✅ NEW LOGIC: Only reserve package after payment is verified
+             // This prevents false locks from unpaid bookings
+             // Admin will verify payment and trigger reservation
+             
+             error_log("Package booking created successfully. Order ID: {$orderId}, Package ID: {$packageId}, Status: pending");
+             error_log("Package will be reserved after payment verification by admin");
+             
+             $_SESSION['success'] = 'Booking created successfully! Please proceed with payment.';
+             header('Location: ' . BASE_URL . 'payment?order_id=' . $orderId);
+             exit;
+         } else {
+             error_log("Failed to create package booking. Package ID: {$packageId}");
+             $_SESSION['error'] = 'Failed to create package booking. Please try again.';
+             header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+             exit;
+         }
+     } catch (Exception $e) {
+         error_log("Exception creating package booking: " . $e->getMessage() . " | Package ID: {$packageId}");
+         $_SESSION['error'] = 'An error occurred while creating your booking. Please try again.';
+         header('Location: ' . BASE_URL . 'packages/view/' . $packageId);
+         exit;
+     }
+ }
     
     public function showPayment()
     {

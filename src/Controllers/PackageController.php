@@ -11,16 +11,35 @@ class PackageController {
         $this->packageModel = new Package();
     }
     
-    public function index() {
-        // Show dynamic packages stored in DB
-        $packages = $this->packageModel->findAll();
-        $this->render('packages/index', [ 'packages' => $packages ]);
+    public function index()
+    {
+        // ✅ USE $this->packageModel instead of creating new instance
+        $packages = $this->packageModel->findAllWithReservationStatus();
+        
+        $data = [
+            'packages' => $packages
+            
+        ];
+        
+        $this->render('packages/index', $data);
     }
-
-    public function show(int $id) {
-        $package = $this->packageModel->findById($id);
-        if (!$package) { http_response_code(404); echo 'Package not found'; return; }
-        $this->render('packages/show', [ 'package' => $package ]);
+    
+    public function show($id)
+    {
+        // ✅ USE $this->packageModel instead of creating new instance
+        $package = $this->packageModel->findByIdWithReservationStatus($id);
+        
+        if (!$package) {
+            $_SESSION['error'] = 'Package not found';
+            header('Location: ' . BASE_URL . 'packages');
+            exit;
+        }
+        
+        $data = [
+            'package' => $package
+        ];
+        
+        $this->render('packages/show', $data);
     }
     
     private function render($template, $data = []) {

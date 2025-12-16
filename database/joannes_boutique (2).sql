@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2025 at 11:50 AM
+-- Generation Time: Dec 16, 2025 at 03:15 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -78,19 +78,14 @@ CREATE TABLE `booking_orders` (
 --
 
 INSERT INTO `booking_orders` (`order_id`, `user_id`, `order_type`, `item_id`, `event_date`, `rental_start`, `rental_end`, `total_amount`, `payment_status`, `penalty_amount`, `penalty_paid`, `actual_return_date`, `payment_method`, `reference_number`, `paymongo_payment_id`, `proof_image`, `contact_name`, `contact_email`, `contact_phone`, `quantity`, `size`, `created_at`, `is_penalty_paid`) VALUES
-(47, 4, 'rental', 1, NULL, '2025-11-07', '2025-11-08', 1299.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_47_1762492436', 'link_L3foknaqtAyShjRrVSfkJ8qm', NULL, 'customer test', 'customer@gmail.com', '09265348921', 1, '', '2025-11-07 05:13:53', 0),
-(48, 4, 'rental', 3, NULL, '2025-10-30', '2025-10-31', 899.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_48_1762492657', 'link_BRoiDTRNE4KChBExmm5hWN3s', NULL, 'customer test', 'customer@gmail.com', '09265348921', 1, '', '2025-11-07 05:17:35', 1),
-(49, 4, 'rental', 1, NULL, '2025-11-09', '2025-11-10', 1299.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_49_1762654687', 'link_vkEb8V6YQrwgy8dapto8LUAN', NULL, 'customer test', 'customer@gmail.com', '09999999999', 1, '', '2025-11-09 02:18:04', 0),
-(50, 4, 'rental', 1, NULL, '2025-11-11', '2025-11-19', 1299.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_50_1762656890', 'link_a24gt5uJsk61bXjYC9MTLKqt', NULL, 'customer test', 'customer@test.com', '09317151466', 1, '', '2025-11-09 02:54:46', 0),
-(53, 4, 'rental', 2, NULL, '2025-11-09', '2025-11-12', 2099.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_53_1762659148', 'link_zpP9oGzX8t3AzwadMBWJvbwv', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-09 03:32:26', 0),
-(54, 4, 'rental', 12, NULL, '2025-11-14', '2025-11-15', 1200.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_54_1762659441', 'link_nsjTmNxaEYr7zbSduGXLSeMe', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-09 03:37:18', 0),
-(56, 4, 'rental', 12, NULL, '2025-11-17', '2025-11-17', 1200.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_56_1763354231', 'link_ZxPmM4Sd1uGnmMHM3tUD8WJf', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-17 04:37:07', 0),
-(57, 4, 'rental', 1, NULL, '2025-11-20', '2025-11-23', 1299.00, '', 0.00, 0, NULL, 'GCash', NULL, NULL, NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-20 08:11:12', 0),
-(58, 5, 'rental', 1, NULL, '2025-11-24', '2025-11-26', 1299.00, '', 0.00, 0, NULL, 'GCash', NULL, NULL, NULL, 'joannes gowns', 'admin@joannesgowns.com', '09562625959', 1, '', '2025-11-24 06:24:46', 0),
-(59, 4, 'rental', 2, NULL, '2025-11-24', '2025-11-27', 2099.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_59_1763965624', 'link_QrEcNFrSLfqCLbYsZVgmrJsR', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-24 06:26:56', 0),
-(61, 4, 'rental', 3, NULL, '2025-11-26', '2025-11-26', 899.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_61_1764135352', 'link_v6ZChzTggCF6xpc1bnput8Si', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-26 05:35:40', 0),
-(62, 4, 'rental', 3, NULL, '2025-11-27', '2025-11-30', 899.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_62_1764231111', 'link_tvLeLYft2pn6CkgupEYsK659', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-27 08:11:48', 0),
-(66, 5, 'package', 12, NULL, NULL, NULL, 20000.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_66_1764239968', 'link_jwAw6F3ArhkkszCC23KhNz1P', NULL, 'test', 'test@gmail.com', '0959959559', 1, NULL, '2025-11-27 10:39:26', 0);
+(62, 4, 'rental', 3, NULL, '2025-11-27', '2025-11-30', 899.00, '', 0.00, 0, NULL, 'GCash', 'BOOKING_62_1764231111', 'link_tvLeLYft2pn6CkgupEYsK659', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-11-27 08:11:48', 1),
+(74, 4, 'package', 11, '2025-11-29', NULL, NULL, 10000.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_74_1764500424', 'link_FocdrDWNBq9YQ5vFQwyJdJ6Q', NULL, 'customer test', 'customer@test.com', '09317151466', 1, NULL, '2025-11-30 11:00:22', 0),
+(78, 8, 'rental', 1, NULL, '2025-11-30', '2025-12-02', 1299.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_78_1764503897', 'link_PT7p8zKQMZXhLvSBgJ5Tm5xg', NULL, 'june orias', 'june2@gmail.com', '09598151365', 1, '', '2025-11-30 11:58:15', 0),
+(79, 8, 'package', 11, '2025-11-30', NULL, NULL, 10000.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_79_1764503985', 'link_ExHSL9ikXtF4pEwyM3FEaaR8', NULL, 'customer test', 'customer@gmail.com', '09929166903', 1, NULL, '2025-11-30 11:59:43', 0),
+(80, 8, 'package', 12, '2025-11-25', NULL, NULL, 20000.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_80_1764504302', 'link_fjyvvML5C73JYKW3Ezb2JSWM', NULL, 'customer test', 'customer@gmail.com', '09929166903', 1, NULL, '2025-11-30 12:05:00', 0),
+(82, 5, 'package', 11, '2025-12-01', NULL, NULL, 10000.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_82_1764554240', 'link_P2RFn7X2kmzwcRz1BeRfcKhL', NULL, 'joannes gowns', 'admin@joannesgowns.com', '09562625959', 1, NULL, '2025-12-01 01:57:17', 0),
+(83, 5, 'rental', 12, NULL, '2025-12-01', '2025-12-03', 1200.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_83_1764554399', 'link_Kq19uBJ2YMipbxxsALUmqJsU', NULL, 'joannes gowns', 'admin@joannesgowns.com', '09562625959', 1, '', '2025-12-01 01:59:56', 0),
+(84, 4, 'rental', 1, NULL, '2025-12-09', '2025-12-11', 1299.00, 'verified', 0.00, 0, NULL, 'GCash', 'BOOKING_84_1765263787', 'link_b3wsXbQxGBSzf6BcRWqEbdDd', NULL, 'customer test', 'customer@test.com', '09317151400', 1, '', '2025-12-09 07:03:04', 0);
 
 -- --------------------------------------------------------
 
@@ -131,7 +126,8 @@ CREATE TABLE `categories` (
 INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image`, `is_active`, `created_at`) VALUES
 (1, 'Gowns', 'gowns', '', NULL, 1, '2025-10-19 17:33:47'),
 (2, 'Wedding Dresses', 'wedding-dresses', 'Beautiful bridal gowns for your special day', NULL, 1, '2025-10-19 17:33:47'),
-(3, 'Suits', 'suits', 'Professional and formal suits', NULL, 1, '2025-10-19 17:33:47');
+(3, 'Suits', 'suits', 'Professional and formal suits', NULL, 1, '2025-10-19 17:33:47'),
+(15, 'New Arrival', 'new-arrival', '', NULL, 1, '2025-12-12 05:58:28');
 
 -- --------------------------------------------------------
 
@@ -212,8 +208,8 @@ CREATE TABLE `packages` (
 --
 
 INSERT INTO `packages` (`package_id`, `package_name`, `hotel_name`, `hotel_address`, `hotel_description`, `number_of_guests`, `inclusions`, `freebies`, `background_image`, `price`, `created_at`, `is_reserved`) VALUES
-(11, 'Platinum Joanne\'s Package', 'Sofitel Philippine Plaza', 'CCP Complex, Roxas Boulevard, Manila', 'Experience luxury and sophistication at one of Manila\'s most prestigious venues with stunning views of Manila Bay.', 20, '{\"Venue Rental\":[\"Grand Ballroom (500 pax)\",\"Garden Cocktail Reception\",\"Valet Parking\"],\"Decor\":[\"Elegant floral centerpieces\"],\"Catering\":[\"3-course plated dinner\",\"Unlimited beverages\",\"Coffee and dessert station\"]}', '', 'pkg_bg_69282b8ae1c6a1.74084329.jpg', 15000.00, '2025-11-27 09:57:39', 0),
-(12, 'Platinum Joanne\'s Package', 'Sofitel Philippine Plaza', 'CCP Complex, Roxas Boulevard, Manila', 'Experience luxury and sophistication at one of Manila\'s most prestigious venues with stunning views of Manila Bay.', 20, '{\"Venue Rental\":[\"Grand Ballroom (500 pax)\",\"Garden Cocktail Reception\"],\"Catering\":[\"3-course plated dinner\",\"Unlimited beverages\"]}', '', 'pkg_bg_69282a268c96d4.02590884.jpg', 20000.00, '2025-11-27 10:38:30', 1);
+(11, 'Basic Joanne\'s Package', 'Sofitel Philippine Plaza', 'CCP Complex, Roxas Boulevard, Manila', 'Experience luxury and sophistication at one of Manila\'s most prestigious venues with stunning views of Manila Bay.', 20, '{\"Venue Rental\":[\"Grand Ballroom (500 pax)\",\"Garden Cocktail Reception\",\"Valet Parking\"],\"Decor\":[\"Elegant floral centerpieces\"],\"Catering\":[\"3-course plated dinner\",\"Unlimited beverages\",\"Coffee and dessert station\"]}', '', 'pkg_bg_69282b8ae1c6a1.74084329.jpg', 10000.00, '2025-11-27 09:57:39', 0),
+(12, 'Platinum Joanne\'s Package', 'Sofitel Philippine Plaza', 'CCP Complex, Roxas Boulevard, Manila', 'Experience luxury and sophistication at one of Manila\'s most prestigious venues with stunning views of Manila Bay.', 20, '{\"Venue Rental\":[\"Grand Ballroom (500 pax)\",\"Garden Cocktail Reception\"],\"Catering\":[\"3-course plated dinner\",\"Unlimited beverages\"]}', '', 'pkg_bg_69282a268c96d4.02590884.jpg', 20000.00, '2025-11-27 10:38:30', 0);
 
 -- --------------------------------------------------------
 
@@ -243,7 +239,7 @@ INSERT INTO `products` (`id`, `category_id`, `name`, `description`, `price`, `im
 (1, 1, 'Elegant White Gown', 'Sophisticated floor-length gown perfect for formal events and galas\r\n\r\nQuantity: 1\r\nSize: M', 1299.00, 'prod_68f5332c1f80b9.24922026.jpeg', 5, 1, 1, '2025-10-19 17:33:47', '2025-11-26 10:07:02'),
 (2, 2, 'Classic Bridal Gown', 'Timeless wedding dress with intricate lace details and cathedral train\r\n\r\nQuantity: 1\r\nSize: S', 2099.00, 'prod_68f53470c9ab57.66314518.jpeg', 3, 1, 1, '2025-10-19 17:33:47', '2025-11-26 10:09:14'),
 (3, 3, 'Premium Business Suit', 'Tailored three-piece suit with premium wool fabric\r\n\r\nQuantity: 1\r\nSize: M', 899.00, 'prod_68f5335631a740.47086495.jpeg', 10, 1, 1, '2025-10-19 17:33:47', '2025-11-26 10:09:55'),
-(12, 3, 'Sample Toxido', 'This is just a sample Toxido\r\n\r\nQuantity: 1\r\nSize: L', 1200.00, 'prod_690b5b88a64188.05745833.jpg', 1, 1, 1, '2025-11-05 14:13:28', '2025-11-26 10:10:59');
+(12, 3, 'Sample Toxido', 'New Arrival\r\n\r\nThis is just a sample Toxido\r\n\r\nQuantity: 1\r\nSize: L', 1200.00, 'prod_690b5b88a64188.05745833.jpg', 1, 1, 1, '2025-11-05 14:13:28', '2025-12-12 02:54:37');
 
 -- --------------------------------------------------------
 
@@ -323,7 +319,8 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `password`, `phon
 (4, 'customer', 'test', 'customer@test.com', '$2y$10$Cm8M87EKOMEt/CJbHEbm0e0BtNeDVvCeGb7Bfo4LCYwVrTYM7SbRO', '09317151400', 'customer', '2025-10-19 17:51:46', '2025-11-09 02:53:03'),
 (5, 'joannes', 'gowns', 'admin@joannesgowns.com', '$2y$10$xC9Nm/CqM.yUwbbpGcVgneN9wWvfWzb0Jt7rPVAA1KtdnWLAny/Ti', '09562625959', 'admin', '2025-10-19 19:09:13', '2025-10-19 19:09:31'),
 (6, 'andrea', 'brillantes', 'adrea@gmail.com', '$2y$10$aQfuf0SycN/ONiFATFLo2ewfA1bbsOs.NdAdAHXZrAF0DUaXP3hfK', '09998556156', 'customer', '2025-11-01 15:47:08', '2025-11-01 15:47:08'),
-(7, 'ceciles', 'store', 'cecile@gmail.com', '$2y$10$vGlVdS72d/J8CXKE/iWr/uyvcLtZq1U7Yly6gnjHOALQbjR62ZmAe', '09787878787', 'customer', '2025-11-27 08:51:03', '2025-11-27 08:51:03');
+(7, 'ceciles', 'store', 'cecile@gmail.com', '$2y$10$vGlVdS72d/J8CXKE/iWr/uyvcLtZq1U7Yly6gnjHOALQbjR62ZmAe', '09787878787', 'customer', '2025-11-27 08:51:03', '2025-11-27 08:51:03'),
+(8, 'june', 'orias', 'june2@gmail.com', '$2y$10$zdqAf6eMOhjesAc1VZtNcOCxFnFViiCXpA7nWsE/BOZILbgpMMK9K', '09598151365', 'customer', '2025-11-30 01:12:21', '2025-11-30 01:12:21');
 
 --
 -- Indexes for dumped tables
@@ -431,7 +428,7 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `booking_orders`
 --
 ALTER TABLE `booking_orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT for table `cart`
@@ -443,7 +440,7 @@ ALTER TABLE `cart`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -467,19 +464,19 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT for table `packages`
 --
 ALTER TABLE `packages`
-  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `testimonials`
@@ -491,7 +488,7 @@ ALTER TABLE `testimonials`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
