@@ -142,6 +142,16 @@ $userPhone = $_SESSION['user_phone'] ?? '';
         box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
         transform: translateY(-2px);
     }
+
+    .badge-new-arrival {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        animation: pulse-badge-new 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-badge-new {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+    }
 </style>
 
 <div class="product-gradient min-h-screen py-12">
@@ -247,12 +257,33 @@ $userPhone = $_SESSION['user_phone'] ?? '';
                 <!-- Product Info -->
                 <div class="fade-in" style="animation-delay: 0.2s;">
                     <div class="bg-white rounded-2xl shadow-xl p-8">
-                        <?php if ($product['is_featured']): ?>
-                            <div class="badge-featured inline-flex items-center px-4 py-2 rounded-full text-white text-sm font-bold mb-4 shadow-lg">
-                                <i class="fas fa-star mr-2"></i>
-                                Featured Product
-                            </div>
-                        <?php endif; ?>
+                        <!-- Badges Container -->
+                        <div class="flex flex-wrap gap-3 mb-4">
+                            <?php if ($product['is_featured']): ?>
+                                <div class="badge-featured inline-flex items-center px-4 py-2 rounded-full text-white text-sm font-bold shadow-lg">
+                                    <i class="fas fa-star mr-2"></i>
+                                    Featured Product
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php 
+                            // Check if product is new (created within last 30 days)
+                            $isNewArrival = false;
+                            if (!empty($product['created_at'])) {
+                                $createdDate = new DateTime($product['created_at']);
+                                $currentDate = new DateTime();
+                                $daysDiff = $currentDate->diff($createdDate)->days;
+                                $isNewArrival = $daysDiff <= 30;
+                            }
+                            ?>
+                            
+                            <?php if ($isNewArrival): ?>
+                                <div class="badge-new-arrival inline-flex items-center px-4 py-2 rounded-full text-white text-sm font-bold shadow-lg">
+                                    <i class="fas fa-certificate mr-2"></i>
+                                    New Arrival
+                                </div>
+                            <?php endif; ?>
+                        </div>
                         
                         <h1 class="font-serif-elegant text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                             <?php echo htmlspecialchars($product['name']); ?>
@@ -743,6 +774,7 @@ $userPhone = $_SESSION['user_phone'] ?? '';
         
         // Also show in modal (for users who have modal open)
         const modalErrorDiv = document.getElementById('availability-error-modal');
+    
         if (modalErrorDiv) {
             modalErrorDiv.className = 'mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-md';
             modalErrorDiv.innerHTML = `
